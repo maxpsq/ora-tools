@@ -1,5 +1,21 @@
 CREATE OR REPLACE
 PACKAGE BODY tabtext AS
+/**
+___________     ___.         .__                 ___________              __   
+\__    ___/____ \_ |__  __ __|  | _____ _______  \__    ___/___ ___  ____/  |_ 
+  |    |  \__  \ | __ \|  |  \  | \__  \\_  __ \   |    |_/ __ \\  \/  /\   __\
+  |    |   / __ \| \_\ \  |  /  |__/ __ \|  | \/   |    |\  ___/ >    <  |  |  
+  |____|  (____  /___  /____/|____(____  /__|      |____| \___  >__/\_ \ |__|  
+               \/    \/                \/                     \/      \/                                
+               
+  a software by Massimo Pasquini                                    vers. 0.0.3
+  
+  License                                                    Apache version 2.0                        
+  Last update                                                       2016-Jan-15
+  
+  Project homepage                          https://github.com/maxpsq/ora-tools
+  
+ */
 
    SUBTYPE oracle_data_type_t IS PLS_INTEGER; -- Type used in SYS.DBMS_TYPES package
    SUBTYPE refcursor_number_t IS INTEGER;
@@ -9,6 +25,7 @@ PACKAGE BODY tabtext AS
    g_sepval                   boolean not null := true;
    g_fs                       varchar2(1) ;
    g_encl                     varchar2(1) ;
+   g_esc                      varchar2(1) ;
    g_head_printed             BOOLEAN ;
    g_head_on                  BOOLEAN NOT NULL DEFAULT true ;
    g_headings                 headings_ntt ;
@@ -33,27 +50,32 @@ PACKAGE BODY tabtext AS
    END reset_cursor;
 
 
-   PROCEDURE separated_values(fs_in   IN varchar2, encl_in   IN varchar2) IS
+   PROCEDURE csv(
+      fs_in     IN varchar2 default ',', 
+      encl_in   IN varchar2 default '"', 
+      esc_in    IN varchar2 default '\'
+   ) IS
    BEGIN
       g_fs         := fs_in ;
       g_encl       := encl_in ;
+      g_esc        := esc_in ;
       g_sepval     := true;
       g_head_on    := true;
       g_head_printed := false;
       g_headings   := headings_ntt() ;
       reset_cursor ;
-   END separated_values;
+   END csv;
 
 
-   PROCEDURE separated_values IS
+   PROCEDURE tsv IS
    BEGIN
-      separated_values(';', '"');
-   END separated_values;
+      csv(chr(9), '', '');
+   END tsv;
 
 
    PROCEDURE fixed_size IS
    BEGIN
-      separated_values('','');
+      csv('', '', '');
       g_sepval := false;
    END fixed_size;
 
@@ -845,13 +867,18 @@ PACKAGE BODY tabtext AS
       size_in         BINARY_INTEGER,
       align_in        char
    ) IS
-   
+
+      FUNCTION escape(val_in varchar2) return varchar2 is
+      begin
+         return replace(val_in, g_encl, g_esc||g_encl);
+      end escape;
+
       FUNCTION enclose(val_in varchar2) return varchar2 is
       BEGIN
          if ( g_encl is null) then
             return val_in;
          end if;
-         return g_encl || val_in || g_encl ;
+         return g_encl || escape(val_in) || g_encl ;
       END enclose;
       
       FUNCTION fixed_format(val_in varchar2, size_in binary_integer, align_in char) return varchar2 is
@@ -961,6 +988,14 @@ PACKAGE BODY tabtext AS
       end if;
    END wrap;
    
+   
+   PROCEDURE unwrap IS
+   BEGIN
+      if (dbms_sql.is_open(g_rcn) ) then
+         dbms_sql.close_cursor(g_rcn);
+      end if;
+   END unwrap;
+   
 
    FUNCTION get_row RETURN VARCHAR2 IS
    
@@ -981,6 +1016,7 @@ PACKAGE BODY tabtext AS
       END IF;
       l_fdbk := DBMS_SQL.FETCH_ROWS (g_rcn); 
       IF ( l_fdbk = 0 ) THEN
+         unwrap;
          RAISE no_data_found ;
       END IF;
       FOR l_col_idx IN 1 .. g_column_count LOOP
@@ -1015,5 +1051,5 @@ PACKAGE BODY tabtext AS
    END get_row;
    
 BEGIN
-   separated_values ;
+   csv ;
 END tabtext;
