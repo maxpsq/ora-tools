@@ -11,7 +11,7 @@ ___________     ___.         .__                 ___________              __
   a software by Massimo Pasquini                                    vers. 0.0.3
   
   License                                                    Apache version 2.0                        
-  Last update                                                       2016-Jan-15
+  Last update                                                       2016-Jan-16
   
   Project homepage                          https://github.com/maxpsq/ora-tools
   
@@ -44,6 +44,9 @@ ___________     ___.         .__                 ___________              __
    );
 
 
+   /*\
+    | Set a tab separated values row format.
+   \*/
    PROCEDURE tsv;
 
 
