@@ -7,7 +7,7 @@ Here's a snippet showing how to use it:
 
 ```
 DECLARE
-   -- the cursor for daat extraction
+   -- the cursor for data extraction
    l_employees_rc  sys_refcursor ;
 
    -- Cursor column names (or aliases) will be shown by default as column headings
@@ -39,8 +39,8 @@ BEGIN
    end loop;
    --> There's no actual need to close the cursor for
    --> TabText does it for you when the cursor is exhausted :)
-   --> A 'unwrap' method is provided to explicetly close the
-   --> cursor in case of unexpected exception are raised.
+   --> A 'unwrap' method is provided to explicitly close the
+   --> cursor in case an unexpected exception is raised.
    tabtext.unwrap; 
    
    dbms_output.new_line;
