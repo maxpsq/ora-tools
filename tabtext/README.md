@@ -1,7 +1,7 @@
 # Tabular Text (tabtext)   vers. 0.0.3
 
 This package provides a simple way to convert a cursor resultset to tabular plain text (like CSV or TSV).
-A fixed size column format is also available but still experimental
+A fixed size column format is also available but still experimental.
 
 Here's a snippet showing how to use it:
 
