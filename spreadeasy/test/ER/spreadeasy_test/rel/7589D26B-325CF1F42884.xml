@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<relationalModel class="oracle.dbtools.crest.model.design.relational.RelationalDesign" name="Relational_1" id="7589D26B-B83B-E447-C50B-325CF1F42884" mainViewID="BA58D186-C4D6-021A-99C5-92552BD386D4">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 14:18:17 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy_test</ownerDesignName>
+<shouldBeOpen>false</shouldBeOpen>
+<selectedRDBMSSite>32076570-2523-435C-2E92-BF29817DFF70</selectedRDBMSSite>
+</relationalModel>

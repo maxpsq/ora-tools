@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <!--
 Extensible Stylesheet Language Transformation file to transform
 a XML document representing a rowset (table) structure to a
@@ -25,10 +25,8 @@ The elements in the XML file must be nested as follows:
   </Row>  
  </Rowset>
 </Spreadsheet>
-
-Notice you're free to name the tags as you like.
-
 -->
+
 <xsl:stylesheet version="1.0"
  xmlns="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
@@ -62,12 +60,12 @@ Notice you're free to name the tags as you like.
 <xsl:template match="/*/*[position() > 1]">
   <Worksheet>
   <xsl:attribute name="ss:Name">
-    <xsl:value-of select="local-name()"/>
+    <xsl:value-of select="./@worksheet_name"/>
   </xsl:attribute>
     <Table x:FullColumns="1" x:FullRows="1">
       <Row>
         <xsl:for-each select="*[position() = 1]/*">
-          <Cell><Data ss:Type="String"><xsl:value-of select="local-name()"/></Data></Cell>
+          <Cell><Data ss:Type="String"><xsl:value-of select="./@column_heading"/></Data></Cell>
         </xsl:for-each>
       </Row>
       <xsl:apply-templates/>

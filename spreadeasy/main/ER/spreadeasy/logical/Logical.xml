@@ -1,0 +1,8 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<LogicalDesign class="oracle.dbtools.crest.model.design.logical.LogicalDesign" name="Logical" id="4C2F5D8B-0A45-B59E-3BB5-710CC716D8D2" mainViewID="860970FF-0E53-6688-0915-C319BD4691E5">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:26:16 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<shouldBeOpen>false</shouldBeOpen>
+</LogicalDesign>

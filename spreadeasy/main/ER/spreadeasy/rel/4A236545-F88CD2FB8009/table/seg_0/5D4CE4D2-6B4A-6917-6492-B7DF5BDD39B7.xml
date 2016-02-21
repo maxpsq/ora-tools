@@ -1,0 +1,56 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="5D4CE4D2-6B4A-6917-6492-B7DF5BDD39B7" name="SPREADEASY_WRK">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:32:46 UTC</createdTime>
+<comment>Staging area to temporarily host the data to be used to create a spreadsheet</comment>
+<commentInRDBMS>Staging area to temporarily host the data to be used to create a spreadsheet</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<ordsAlias>table_2</ordsAlias>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="SPREADSHEET_ID" id="7339F878-1725-22A5-872D-137F26EBA0F0">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:35:19 UTC</createdTime>
+<comment>Unique ID of any spreadsheet creaded by Spreadeasy</comment>
+<commentInRDBMS>Unique ID of any spreadsheet creaded by Spreadeasy</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>10</dataTypePrecision>
+<ownDataTypeParameters>,10,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="WORKSHEET_ID" id="14C177DE-4C3C-BA98-EA09-CD21803C14C3">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:35:19 UTC</createdTime>
+<comment>Worksheet number within the spreadsheet. Worksheets are numbered starting from 1</comment>
+<commentInRDBMS>Worksheet number within the spreadsheet. Worksheets are numbered starting from 1</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>4</dataTypePrecision>
+<ownDataTypeParameters>,4,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="DOCUMENT" id="84B0472F-AE21-8685-51AE-3D8033B1C2D1">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:37:52 UTC</createdTime>
+<comment>Query result as an XML document to be transformed to a Worksheet content</comment>
+<commentInRDBMS>Query result as an XML document to be transformed to a Worksheet content</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT050</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+</Table>

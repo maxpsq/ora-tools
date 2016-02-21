@@ -1,0 +1,11 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<SequenceOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.SequenceOraclev10g" name="SPREADEASY_WRK_SEQ" directorySegmentName="seg_0" id="67B94864-F80C-6ACB-4350-8176AD80AA09">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 18:58:40 UTC</createdTime>
+<comment>Spreadsheet ID on SPREADEASY_WRK table</comment>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<incrementBy>1</incrementBy>
+<maxValue>9999999999</maxValue>
+<startWith>1</startWith>
+</SequenceOraclev10g>

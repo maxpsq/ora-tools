@@ -1,5 +1,21 @@
 create or replace 
 package body spreadeasy as
+/*
+███████╗██████╗ ██████╗ ███████╗ █████╗ ██████╗ ███████╗ █████╗ ███████╗██╗   ██╗
+██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝╚██╗ ██╔╝
+███████╗██████╔╝██████╔╝█████╗  ███████║██║  ██║█████╗  ███████║███████╗ ╚████╔╝ 
+╚════██║██╔═══╝ ██╔══██╗██╔══╝  ██╔══██║██║  ██║██╔══╝  ██╔══██║╚════██║  ╚██╔╝  
+███████║██║     ██║  ██║███████╗██║  ██║██████╔╝███████╗██║  ██║███████║   ██║   
+╚══════╝╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   
+
+  a software by Massimo Pasquini                                   vers. 0.1-M1
+  
+  License                                                    Apache version 2.0
+  Last update                                                       2016-Feb-21
+  
+  Project homepage                          https://github.com/maxpsq/ora-tools
+
+*/
 
    subtype datetime_fmt_t is VARCHAR2(30);
 
@@ -8,7 +24,7 @@ package body spreadeasy as
    SUBTYPE column_datatypes_aa_idx_t is VARCHAR2(32767);
    TYPE column_datatypes_aat is table oF VARCHAR2(32) INDEX BY column_datatypes_aa_idx_t;
    
-   g_ss_style             style_t := Excel;
+   g_ss_style             style_t NOT NULL := Excel;
 
    g_worksheets_nt        worksheets_nt_t not null := worksheets_nt_t();
    g_active_worksheet     worksheet_idx_t;   
@@ -17,7 +33,10 @@ package body spreadeasy as
    
    type session_vars_aat  is table of varchar2(512) index by varchar2(30);
    
-   g_session_vars    session_vars_aat;  
+   g_session_vars         session_vars_aat;  
+   
+   g_start_time               timestamp;
+   g_execution_time           execution_time_t;
    
    procedure inspect_session is
       l_idx  varchar2(30);
@@ -47,7 +66,7 @@ package body spreadeasy as
    procedure alter_session(param_in varchar2, value_in varchar2) is
       l_sql_stmt   varchar2(512);
    begin
-      l_sql_stmt := 'ALTER SESSION SET '||param_in||' = '''||value_in||'''';
+      l_sql_stmt := 'ALTER SESSION SET '||param_in||'='''||value_in||'''';
       execute immediate l_sql_stmt ;
    end;
 
@@ -66,19 +85,22 @@ package body spreadeasy as
    procedure set_excel_session_params is
    begin
       save_session_vars;
-      alter_session('nls_numeric_characters' , '.,');
       alter_session('nls_date_format'        , 'YYYY-MM-DD"T"HH24:MI:SS".000"');
       alter_session('nls_timestamp_format'   , 'YYYY-MM-DD"T"HH24:MI:SS.FF3');
       alter_session('nls_timestamp_tz_format', 'YYYY-MM-DD"T"HH24:MI:SS.FF3');
+      -- In order ALTER SESSION SET NLS_NUMERIC_CHARACTERS to take
+      -- effect is VERY important to set its value BEFORE opening any cursor
+      -- variable. Remember cursors are opened in `addWorksheet`
+      alter_session('nls_numeric_characters' , '.,');
    end;
    
    
    procedure restore_excel_session_params is
    begin
-      restore_session_param('nls_numeric_characters');
       restore_session_param('nls_date_format');
       restore_session_param('nls_timestamp_format');
       restore_session_param('nls_timestamp_tz_format');
+      restore_session_param('nls_numeric_characters');
    end;
    
    
@@ -129,7 +151,6 @@ package body spreadeasy as
    
    procedure reset is
    begin
-      restore_excel_session_params;
       g_worksheets_nt := worksheets_nt_t();
       g_active_worksheet := null;
       g_spreadsheet := null;
@@ -158,7 +179,7 @@ package body spreadeasy as
    begin
       l_doc_props_rec.author  := author_in;
       l_doc_props_rec.company := company_in;
-      l_doc_props_rec.created := sysdate;
+      l_doc_props_rec.created := current_date;
       newWorkbook(style_in, l_doc_props_rec);
    end;
    
@@ -175,8 +196,9 @@ package body spreadeasy as
    function get_style_xslt(style_in  in  style_t) return XMLType 
    is
       l_dburi    varchar2(512);
+      l_style    style_t NOT NULL := style_in;
    begin
-      l_dburi := '/'||USER||'/SPREADEASY_STYLES/ROW[STYLE_ID="'||style_in||'"]/DOCUMENT/text()';
+      l_dburi := '/'||USER||'/SPREADEASY_STYLES/ROW[STYLE_ID="'||l_style||'"]/DOCUMENT/text()';
       return DBURIType(l_dburi).getXML(l_dburi);
    end;
 
@@ -191,9 +213,9 @@ package body spreadeasy as
    Add a new worksheet to the spreadsheet and set it to active 
    or just do nothing if the given worksheet name is already in use.
    */
-   procedure newWorksheet(
-      name_in      in     worksheet_name_t,
-      sqlCursor_io in out sys_refcursor
+   procedure addWorksheet(
+      sqlCursor_io in out sys_refcursor,
+      name_in      in     worksheet_name_t DEFAULT null
    ) is
      l_worksheet_rec   worksheet_rec_t;
    begin
@@ -202,8 +224,7 @@ package body spreadeasy as
          raise no_data_found;
       exception
          when no_data_found then
-            l_worksheet_rec.name := name_in;
---            l_worksheet_rec.refcur := sqlCursor_in;
+            l_worksheet_rec.name := nvl(name_in, 'Worksheet '||to_char(g_worksheets_nt.COUNT+1));
             l_worksheet_rec.refcur := dbms_sql.to_cursor_number(sqlCursor_io);
             g_worksheets_nt.EXTEND;
             g_worksheets_nt(g_worksheets_nt.LAST) := l_worksheet_rec;
@@ -212,14 +233,14 @@ package body spreadeasy as
    end;
    
 
-   procedure newWorksheet(
-      name_in      in worksheet_name_t,
-      sqlSelect_in in varchar2
+   procedure addWorksheet(
+      sqlSelect_in in     varchar2,
+      name_in      in     worksheet_name_t DEFAULT null
    ) is
       l_cur   SYS_REFCURSOR;
    begin
       open l_cur for sqlSelect_in;
-      newWorksheet(name_in, l_cur);
+      addWorksheet(l_cur, name_in);
    end;
    
    
@@ -250,7 +271,8 @@ package body spreadeasy as
       PRAGMA AUTONOMOUS_TRANSACTION;
       
       function datatype_injection(
-        column_datatypes_aa_in in column_datatypes_aat
+        worksheet_rec_in       in worksheet_rec_t
+      , column_datatypes_aa_in in column_datatypes_aat
       ) return XMLType 
       is
          l_ret   XMLType;
@@ -258,20 +280,24 @@ package body spreadeasy as
          
          function xslt_template(column_name_in in varchar2, type_in in varchar2) return CLOB
          is
+            l_buf   CLOB;
          begin
-            return to_clob('<xsl:template match="'||column_name_in||'"><xsl:copy><xsl:attribute name="type">'||type_in||'</xsl:attribute><xsl:apply-templates select="node()"/></xsl:copy></xsl:template>');
+            l_buf := to_clob('<xsl:template match="'||xml_safe_tag_name(column_name_in)||'">');
+            dbms_lob.append(l_buf, to_clob('<xsl:copy><xsl:attribute name="type">'||type_in||'</xsl:attribute>'));
+            dbms_lob.append(l_buf, to_clob('<xsl:attribute name="column_heading">'||htf.escape_sc(column_name_in)||'</xsl:attribute>'));
+            dbms_lob.append(l_buf, to_clob('<xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
+            return l_buf;
          end xslt_template;
         
       begin
          l_buf := to_clob('<?xml version="1.0" encoding="UTF-8"?>');
          dbms_lob.append(l_buf, to_clob('<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >'));
-         dbms_lob.append(l_buf, to_clob('<xsl:template match="/*"><xsl:copy><xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
+         dbms_lob.append(l_buf, to_clob('<xsl:template match="/*"><xsl:copy><xsl:attribute name="worksheet_name">'||htf.escape_sc(worksheet_rec_in.name)||'</xsl:attribute><xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
          dbms_lob.append(l_buf, to_clob('<xsl:template match="ROW"><xsl:copy><xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
-         dbms_lob.append(l_buf, to_clob('<xsl:template match="*/ROW[position()=1]/*"><xsl:copy><xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
          l_colname := column_datatypes_aa_in.FIRST;
          loop 
             exit when l_colname is null;
-            dbms_lob.append(l_buf, xslt_template(xml_safe_tag_name(l_colname), column_datatypes_aa_in(l_colname))); 
+            dbms_lob.append(l_buf, xslt_template(l_colname, column_datatypes_aa_in(l_colname))); 
             l_colname := column_datatypes_aa_in.NEXT(l_colname);
          end loop;
          dbms_lob.append(l_buf, to_clob('</xsl:stylesheet>'));
@@ -325,11 +351,12 @@ package body spreadeasy as
 
       
    begin
+      g_start_time := systimestamp ;
       if ( g_worksheets_nt.COUNT = 0 ) then
          return;
       end if;
       
-      SELECT spreadeasy_spreadsheet_seq.NEXTVAL INTO l_ss_id FROM dual;
+      SELECT spreadeasy_spreadsheet_wrk_seq.NEXTVAL INTO l_ss_id FROM dual;
       
       open l_dummy_cur for
       Select g_doc_props_rec.author as "Author",
@@ -354,11 +381,11 @@ package body spreadeasy as
          for i in 1 .. l_col_cnt loop
             l_dummy_coldt(l_desc_tab(i).col_name) := dbms_sql2excel_type(l_desc_tab(i).col_type);
          end loop;
-         l_datatype_xslt := datatype_injection(l_dummy_coldt);
-      
+         l_datatype_xslt := datatype_injection(l_ws_rec, l_dummy_coldt);
+               
          l_dummy_cur := dbms_sql.to_refcursor(l_ws_rec.refcur);
          l_xmlctx := DBMS_XMLGEN.newContext(l_dummy_cur);
-         DBMS_XMLGEN.SETROWSETTAG(l_xmlctx, l_ws_rec.name);         
+      --   DBMS_XMLGEN.SETROWSETTAG(l_xmlctx, l_ws_rec.name);         
          gen_xml_fragment(l_ss_id, l_ws_idx, l_xmlctx, l_datatype_xslt);
          DBMS_XMLGEN.CLOSECONTEXT(l_xmlctx);
          close l_dummy_cur;  
@@ -369,7 +396,7 @@ package body spreadeasy as
       l_spreadsheet_xslt := get_style_xslt(g_ss_style);
 
       select XMLtransform( 
-           XMLELEMENT("SPREADSHEET", XMLAGG(rowset))
+           XMLELEMENT("SPREADSHEET", XMLAGG(document))
            , l_spreadsheet_xslt) 
            as xml
         into g_spreadsheet 
@@ -378,6 +405,7 @@ package body spreadeasy as
        order by worksheet_id;
         
       cleanup_this_routine;
+      g_execution_time := systimestamp - g_start_time;
    exception
       when others then
          cleanup_this_routine;
@@ -394,6 +422,18 @@ package body spreadeasy as
    function getAsCLOB return CLOB is
    begin
       return g_spreadsheet.getCLOBVal();
+   end;
+   
+   
+   function getStartTime return timestamp is
+   begin
+      return g_start_time;
+   end;
+   
+   
+   function getExecutionTime return execution_time_t is
+   begin
+      return g_execution_time;
    end;
    
 

@@ -1,0 +1,5 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<oracle.dbtools.crest.model.design.relational.RelationalDesign>
+   <object objectType="Table" objectID="57BD19D4-9A84-79D6-2948-CF081C89FEFC" name="SPREADEASY_STYLES" seqName="seg_0"/>
+   <object objectType="Table" objectID="5D4CE4D2-6B4A-6917-6492-B7DF5BDD39B7" name="SPREADEASY_WRK" seqName="seg_0"/>
+</oracle.dbtools.crest.model.design.relational.RelationalDesign>

@@ -1,0 +1,9 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<OSDM_Design class="oracle.dbtools.crest.model.design.Design" name="spreadeasy" id="E38E2524-1C26-519C-0A57-05004B2A24CC" version="3.5">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:26:16 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<capitalNames>false</capitalNames>
+<designId>E38E2524-1C26-519C-0A57-05004B2A24CC</designId>
+</OSDM_Design>

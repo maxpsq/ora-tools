@@ -1,0 +1,42 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev11g class="oracle.dbtools.crest.model.design.storage.oracle.v11g.TableProxyOraclev11g" name="SPREADEASY_STYLES" directorySegmentName="seg_0" id="57BD19D4-9A84-79D6-2948-CF081C89FEFC">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 17:03:03 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="DOCUMENT" id="741699BE-6DCF-EF5B-8B68-F5932FD0C3D3">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 17:03:03 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<cache>NOCACHE</cache>
+</ColumnProxy>
+<ColumnProxy name="STYLE_ID" id="937E6C7D-5934-4C5E-E7CF-A4768699C516">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 17:03:03 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DESCRIPTION" id="AA137B6F-7A88-73F6-1534-38AE1A45EE25">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 17:03:03 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="SPREADEASY_STYLES_PK" id="18669ADC-F34F-5A5D-2C0E-9D8923B43B9B">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 17:03:03 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<indexSort>SORTED</indexSort>
+</PrimaryKey>
+</primaryKeys>
+</TableProxyOraclev11g>

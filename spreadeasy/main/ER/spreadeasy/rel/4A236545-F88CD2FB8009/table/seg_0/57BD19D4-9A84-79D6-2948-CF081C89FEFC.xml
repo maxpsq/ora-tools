@@ -1,0 +1,69 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="57BD19D4-9A84-79D6-2948-CF081C89FEFC" name="SPREADEASY_STYLES">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:27:45 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<ordsAlias>table_1</ordsAlias>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="STYLE_ID" id="937E6C7D-5934-4C5E-E7CF-A4768699C516">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:31:09 UTC</createdTime>
+<comment>XSLT ID </comment>
+<commentInRDBMS>XSLT ID </commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>3</dataTypePrecision>
+<ownDataTypeParameters>,3,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="DESCRIPTION" id="AA137B6F-7A88-73F6-1534-38AE1A45EE25">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:31:59 UTC</createdTime>
+<comment>XSLT description</comment>
+<commentInRDBMS>XSLT description</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>60 CHAR</dataTypeSize>
+<ownDataTypeParameters>60 CHAR,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="DOCUMENT" id="741699BE-6DCF-EF5B-8B68-F5932FD0C3D3">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:32:28 UTC</createdTime>
+<comment>XSLT Document</comment>
+<commentInRDBMS>XSLT Document</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT050</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="18669ADC-F34F-5A5D-2C0E-9D8923B43B9B" name="SPREADEASY_STYLES_PK">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 16:31:09 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="937E6C7D-5934-4C5E-E7CF-A4768699C516"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

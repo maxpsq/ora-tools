@@ -1,5 +1,21 @@
 create or replace 
 package spreadeasy as
+/*
+███████╗██████╗ ██████╗ ███████╗ █████╗ ██████╗ ███████╗ █████╗ ███████╗██╗   ██╗
+██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝╚██╗ ██╔╝
+███████╗██████╔╝██████╔╝█████╗  ███████║██║  ██║█████╗  ███████║███████╗ ╚████╔╝ 
+╚════██║██╔═══╝ ██╔══██╗██╔══╝  ██╔══██║██║  ██║██╔══╝  ██╔══██║╚════██║  ╚██╔╝  
+███████║██║     ██║  ██║███████╗██║  ██║██████╔╝███████╗██║  ██║███████║   ██║   
+╚══════╝╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   
+
+  a software by Massimo Pasquini                                   vers. 0.1-M1
+  
+  License                                                    Apache version 2.0
+  Last update                                                       2016-Feb-21
+  
+  Project homepage                          https://github.com/maxpsq/ora-tools
+
+*/
 
    TYPE doc_props_rt is record(
       author      varchar2(128),
@@ -20,6 +36,9 @@ package spreadeasy as
    
    Excel        CONSTANT  style_t := 1 ;
 -- Calc         CONSTANT  style_t := 2 ;
+
+
+   subtype execution_time_t   is INTERVAL DAY(1) TO SECOND(9);
 
    
    procedure reset;
@@ -47,15 +66,15 @@ package spreadeasy as
    procedure format(style_in  in  style_t);
    
 
-   procedure newWorksheet(
-      name_in      in     worksheet_name_t,
-      sqlCursor_io in out sys_refcursor
+   procedure addWorksheet(
+      sqlCursor_io in out sys_refcursor,
+      name_in      in     worksheet_name_t DEFAULT null
    );
    
    
-   procedure newWorksheet(
-      name_in      in worksheet_name_t,
-      sqlSelect_in in varchar2
+   procedure addWorksheet(
+      sqlSelect_in in     varchar2,
+      name_in      in     worksheet_name_t DEFAULT null
    );
    
    
@@ -70,6 +89,11 @@ package spreadeasy as
    
    function getAsCLOB return CLOB;
    
+   
+   function getStartTime return timestamp;
+   
+   
+   function getExecutionTime return execution_time_t;
    
 end;
 /

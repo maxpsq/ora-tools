@@ -1,0 +1,33 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev11g class="oracle.dbtools.crest.model.design.storage.oracle.v11g.TableProxyOraclev11g" name="SPREADEASY_WRK" directorySegmentName="seg_0" id="5D4CE4D2-6B4A-6917-6492-B7DF5BDD39B7">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 17:03:03 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="WORKSHEET_ID" id="14C177DE-4C3C-BA98-EA09-CD21803C14C3">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 17:03:03 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="SPREADSHEET_ID" id="7339F878-1725-22A5-872D-137F26EBA0F0">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 17:03:03 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DOCUMENT" id="84B0472F-AE21-8685-51AE-3D8033B1C2D1">
+<createdBy>max</createdBy>
+<createdTime>2016-02-21 17:03:03 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<cache>NOCACHE</cache>
+</ColumnProxy>
+</columnProxies>
+</TableProxyOraclev11g>
