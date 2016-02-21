@@ -8,10 +8,10 @@ ___________     ___.         .__                 ___________              __
   |____|  (____  /___  /____/|____(____  /__|      |____| \___  >__/\_ \ |__|  
                \/    \/                \/                     \/      \/                                
                
-  a software by Massimo Pasquini                                    vers. 0.0.3
+  a software by Massimo Pasquini                                   vers. 0.1-M1
   
   License                                                    Apache version 2.0                        
-  Last update                                                       2016-Jan-16
+  Last update                                                       2016-Feb-21
   
   Project homepage                          https://github.com/maxpsq/ora-tools
   
@@ -860,9 +860,8 @@ ___________     ___.         .__                 ___________              __
    end urowid_as_str;
 
 
-      -- Use NOCOPY and track the time needed
    PROCEDURE add_column( 
-      row_io   in out VARCHAR2, 
+      row_io   in out NOCOPY VARCHAR2, 
       value_in        VARCHAR2, 
       size_in         BINARY_INTEGER,
       align_in        char
