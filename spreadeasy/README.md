@@ -1,4 +1,4 @@
-# SpreadEasy vers. 0.1-M1 (Milesone 1)
+# SpreadEasy vers. 0.1-M1 (Milestone 1)
 
 ## What SpreadEasy is
 It's a simple tool to easily serialize a cursor result set to [Microsoft Office XML Spreadsheet](https://en.wikipedia.org/wiki/Microsoft_Office_XML_formats) format (Microsoft Excel 2002 / Microsoft Office XP, not to be confused with "Office Open XML Format").
