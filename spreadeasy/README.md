@@ -102,7 +102,7 @@ These are the privileges you need to be granted:
 - CREATE PROCEDURE
 - CREATE ANY DIRECTORY
 
-Privided your user has been granted the aformentioned privileges, you can now connect to the Oracle database and
+Privided your user has been granted the aformentioned privileges, you can now connect to the Oracle database and follow the instructions whether you're installing SpreadEasy for the first time or you're migrating to a later version.
 
 1. Run the migration script(s)        main/migrations/*.sql
 2. create spreadeasy package          main/src/spradeasy.pk*
