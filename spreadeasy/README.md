@@ -125,7 +125,7 @@ now check wheather Spreadeasy runs fine or not, executing the example script at 
 ## Granting execution privileges to Spreadeasy
 Spreadeasy was created to give a straightforward way to export query results as a spreadsheet, so it was designed to be granted to anybody who can access your Oracle DB. Just grant `execute privilege` on SPREADEASY package to any user who need it, or even better, make it available to the whole world granting execution to PUBLIC. 
 
-The SPREADEASY_ADMIN package provides an access layer to administrative tasks and its access MUST BE RESTRICTED to a DBA.
+The SPREADEASY_ADMIN package provides an access layer to administrative tasks and access to its routines MUST BE RESTRICTED to DBAs.
 
 
 That's all. I expect you'll be loving Spreadeasy a lot. I'll be glad to hearing from you.
