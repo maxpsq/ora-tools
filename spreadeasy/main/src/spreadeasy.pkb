@@ -8,10 +8,10 @@ package body spreadeasy as
 ███████║██║     ██║  ██║███████╗██║  ██║██████╔╝███████╗██║  ██║███████║   ██║   
 ╚══════╝╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   
 
-  a software by Massimo Pasquini                                   vers. 0.1-M1
+  a software by Massimo Pasquini                                   vers. 0.1-M2
   
   License                                                    Apache version 2.0
-  Last update                                                       2016-Feb-21
+  Last update                                                       2016-Feb-23
   
   Project homepage                          https://github.com/maxpsq/ora-tools
 
@@ -197,8 +197,10 @@ package body spreadeasy as
    is
       l_dburi    varchar2(512);
       l_style    style_t NOT NULL := style_in;
+      l_owner    varchar2(30);
    begin
-      l_dburi := '/'||USER||'/SPREADEASY_STYLES/ROW[STYLE_ID="'||l_style||'"]/DOCUMENT/text()';
+      l_owner := sys_context('userenv','current_schema');
+      l_dburi := '/'||l_owner||'/SPREADEASY_STYLES/ROW[STYLE_ID="'||l_style||'"]/DOCUMENT/text()';
       return DBURIType(l_dburi).getXML(l_dburi);
    end;
 

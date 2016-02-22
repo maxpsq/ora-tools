@@ -1,4 +1,4 @@
-# SpreadEasy vers. 0.1-M1 (Milestone 1)
+# SpreadEasy vers. 0.1-M2 (Milestone 2)
 
 
 ## What SpreadEasy is
