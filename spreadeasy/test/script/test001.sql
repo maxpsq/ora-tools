@@ -4,8 +4,11 @@ set serveroutput on;
 declare
    l_cur   SYS_REFCURSOR;
 begin
-   OPEN l_cur FOR SELECT * FROM oe.orders ;
+   -- It's important to open the cursor variable after calling `newExcel`
+   -- where the NLS_NUMERIC_CHARACTERS session variable is set. Excel requires
+   -- decimal numbers to be formatted using the point as decimal separator.
    spreadeasy.newExcel;
+   OPEN l_cur FOR SELECT * FROM oe.orders ;
    spreadeasy.addWorksheet(l_cur, 'Orders');
    spreadeasy.build;
    
