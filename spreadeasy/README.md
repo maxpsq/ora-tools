@@ -13,7 +13,7 @@ move to a specific cell and set its value nor to write formulas or such. Spreade
 
 ## How it works
 SpreadEasy relies on Oracle XML DB. The cursors provided are just used to generate XML documents
-via DBMS_XML package and then transformed to a Spreadsheet via XSLT.
+via DBMS_XML package and then transformed to a spreadsheet via XSLT.
 
 
 ## How to use it
@@ -69,10 +69,10 @@ end;
 your cursor by setting NLS_* variables issuing a set of
 ALTER SESSION commands on call to `newExcel`. It's important
 to open all the cursor variables after the session is altered.
-Cursor eventually opened before the ALTER SESSION takes place,
+Cursors eventually opened before the ALTER SESSION takes place,
 won't be affected by the new setting of NLS_NUMERIC_CHARACTERS.
 You won't notice this issue if your default locale uses a point
-as decimal separator, but strongly I suggest to make your 
+as decimal separator, but I strongly suggest to make your 
 application portable by obeying this rule.
 Passing a string containing a SQL statement instead of a cursor
 variable, relieves you from using this workaround.
