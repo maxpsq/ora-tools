@@ -134,20 +134,7 @@ package body spreadeasy as
       l_ret := escape_tag_name(l_ret);  
       return l_ret;
    end xml_safe_tag_name;
-   /*
-   procedure cleanup_ctx is
-      l_ws_idx    worksheet_idx_t;  
-   begin
-      if ( g_worksheets_nt.COUNT = 0 ) then
-         return;
-      end if;
-      l_ws_idx := g_worksheets_nt.FIRST;
-      while ( l_ws_idx <= g_worksheets_nt.LAST ) 
-      loop
-         DBMS_SQL.CLOSE(g_worksheets_nt(l_ws_idx).refcur);
-         l_ws_idx := g_worksheets_nt.NEXT(l_ws_idx);
-      end loop;
-   end;*/
+
    
    procedure reset is
    begin
@@ -387,7 +374,6 @@ package body spreadeasy as
                
          l_dummy_cur := dbms_sql.to_refcursor(l_ws_rec.refcur);
          l_xmlctx := DBMS_XMLGEN.newContext(l_dummy_cur);
-      --   DBMS_XMLGEN.SETROWSETTAG(l_xmlctx, l_ws_rec.name);         
          gen_xml_fragment(l_ss_id, l_ws_idx, l_xmlctx, l_datatype_xslt);
          DBMS_XMLGEN.CLOSECONTEXT(l_xmlctx);
          close l_dummy_cur;  

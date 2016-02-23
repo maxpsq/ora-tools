@@ -44,12 +44,16 @@ package spreadeasy as
    procedure reset;
 
 
+   /** Initialize a new spreadsheet  in the specified style, 
+       setting the given document properties */
    procedure newWorkbook(
       style_in           in style_t,
       doc_props_rec_in   in doc_props_rt
    );
    
    
+   /** Initialize a new spreadsheet in the specified style,
+       setting author and company name */
    procedure newWorkbook(
       style_in     in style_t,
       author_in    in varchar2, 
@@ -57,42 +61,52 @@ package spreadeasy as
    );   
    
    
+   /** Initialize a new Excel spreadsheet setting author and company name */
    procedure newExcel(
       author_in    in varchar2 default user, 
       company_in   in varchar2 default ''
    );
 
 
-   procedure format(style_in  in  style_t);
+   /** Set a spreadsheet style (1=Excel) */
+   procedure setStyle(style_in  in  style_t);
    
 
+   /** Return the spreadsheet style previously set (1=Excel) */
+   function getStyle return style_t;
+
+
+   /** Add a new worksheet and on which the cursor variable data will be shown */
    procedure addWorksheet(
       sqlCursor_io in out sys_refcursor,
       name_in      in     worksheet_name_t DEFAULT null
    );
    
    
+   /** Add a new worksheet and on which the select statement data will be shown */
    procedure addWorksheet(
       sqlSelect_in in     varchar2,
       name_in      in     worksheet_name_t DEFAULT null
    );
    
    
-   function getStyle return style_t;
-   
-   
+   /** Build the spreadsheet using the cursor passed to each worksheet */
    procedure build ;
    
    
+   /** Get the generated spreadsheet as a XMLType variable */
    function getAsXMLType return XMLType;
    
    
+   /** Get the generated spreadsheet as a CLOB variable */
    function getAsCLOB return CLOB;
    
    
+   /** Get the date and time of the last call to `build` routine */
    function getStartTime return timestamp;
    
-   
+
+   /** Get the time it took to execute the `build` routine */
    function getExecutionTime return execution_time_t;
    
 end;
