@@ -1,8 +1,8 @@
-# SpreadEasy vers. 0.1-M2 (Milestone 2)
+# SpreadEasy vers. 1.0-M2 (Milestone 2)
 
 
 ## What SpreadEasy is
-It's a simple tool to easily serialize a cursor result set to [Microsoft Office XML Spreadsheet](https://en.wikipedia.org/wiki/Microsoft_Office_XML_formats) format (Microsoft Excel 2002 / Microsoft Office XP, not to be confused with "Office Open XML Format").
+It's a simple tool to easily serialize a cursor result set to [Microsoft Office XML Spreadsheet (XMLSS)](https://en.wikipedia.org/wiki/Microsoft_Office_XML_formats) format (Microsoft Excel 2002, not to be confused with "Office Open XML Format").
 Just define as many cursor variables as you wish, wrap each of them in a named worksheet and build your spreadsheet.
 
 

@@ -8,7 +8,7 @@ package body spreadeasy as
 ███████║██║     ██║  ██║███████╗██║  ██║██████╔╝███████╗██║  ██║███████║   ██║   
 ╚══════╝╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   
 
-  a software by Massimo Pasquini                                   vers. 0.1-M2
+  a software by Massimo Pasquini                                   vers. 1.0-M2
   
   License                                                    Apache version 2.0
   Last update                                                       2016-Feb-23
@@ -397,10 +397,10 @@ package body spreadeasy as
 
       l_spreadsheet_xslt := get_style_xslt(g_ss_style);
 
-      select XMLtransform( 
-           XMLELEMENT("SPREADSHEET", XMLAGG(document))
-           , l_spreadsheet_xslt) 
-           as xml
+      select XMLRoot(XMLtransform( 
+                         XMLELEMENT("SPREADSHEET", XMLAGG(document)),
+                         l_spreadsheet_xslt), 
+                     VERSION '1.0') as xml
         into g_spreadsheet 
         from spreadeasy_wrk
        where spreadsheet_id = l_ss_id

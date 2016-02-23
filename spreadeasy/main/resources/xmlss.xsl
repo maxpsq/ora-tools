@@ -37,6 +37,7 @@ The elements in the XML file must be nested as follows:
  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" > 
  
 <xsl:template match="/">
+  <xsl:processing-instruction name="mso-application">progid="Excel.Sheet"</xsl:processing-instruction>
   <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
     xmlns:o="urn:schemas-microsoft-com:office:office"
     xmlns:x="urn:schemas-microsoft-com:office:excel"

@@ -8,7 +8,7 @@ package spreadeasy_admin is
 ███████║██║     ██║  ██║███████╗██║  ██║██████╔╝███████╗██║  ██║███████║   ██║   
 ╚══════╝╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   
 
-  a software by Massimo Pasquini                                   vers. 0.1-M2
+  a software by Massimo Pasquini                                   vers. 1.0-M2
   
   License                                                    Apache version 2.0
   Last update                                                       2016-Feb-23
