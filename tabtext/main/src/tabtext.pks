@@ -1,5 +1,4 @@
-CREATE OR REPLACE
-PACKAGE tabtext AS
+CREATE OR REPLACE PACKAGE tabtext AS
 /**
 ___________     ___.         .__                 ___________              __   
 \__    ___/____ \_ |__  __ __|  | _____ _______  \__    ___/___ ___  ____/  |_ 
@@ -8,10 +7,10 @@ ___________     ___.         .__                 ___________              __
   |____|  (____  /___  /____/|____(____  /__|      |____| \___  >__/\_ \ |__|  
                \/    \/                \/                     \/      \/                                
                
-  a software by Massimo Pasquini                                   vers. 0.1-M1
+  a software by Massimo Pasquini                                   vers. 1.0-M2
   
   License                                                    Apache version 2.0                        
-  Last update                                                       2016-Feb-21
+  Last update                                                       2016-Feb-28
   
   Project homepage                          https://github.com/maxpsq/ora-tools
   
@@ -33,10 +32,10 @@ ___________     ___.         .__                 ___________              __
    -- Public routines...
 
    
-   /*\
-    | Set a comma separated values row format.
-    | This is the main initializer for any 'separated values' format.
-   \*/
+   /*
+   Set a comma separated values row format.
+   This is the main initializer for any 'separated values' format.
+   */
    PROCEDURE csv(
       fs_in     IN varchar2 default ',', 
       encl_in   IN varchar2 default '"', 
@@ -44,52 +43,52 @@ ___________     ___.         .__                 ___________              __
    );
 
 
-   /*\
-    | Set a tab separated values row format.
-   \*/
+   /*
+   Set a tab separated values row format.
+   */
    PROCEDURE tsv;
 
 
-   /*\
-    | Set e fixed size column row format (EXPERIMENTAL)
-   \*/
-   PROCEDURE fixed_size ;
+   /*
+   Set e fixed size column row format (EXPERIMENTAL)
+   */
+   PROCEDURE fixed_size(fs_in varchar2 default '');
 
 
-   /*\
-    | Prevents column headings from being returned by 'get_row'
-   \*/
+   /*
+   Prevents column headings from being returned by 'get_row'
+   */
    PROCEDURE headings_off;
 
 
-   /*\
-    | Set your own column headings to override cursor column names
-   \*/
+   /*
+   Set your own column headings to override cursor column names
+   */
    PROCEDURE headings(headings_in   IN headings_ntt);
 
    
-   /*\
-    | Pass your cursor to TabText using this routine.
-   \*/
+   /*
+   Pass your cursor to TabText using this routine.
+   */
    PROCEDURE wrap(rc_in IN OUT sys_refcursor);
 
    
-   /*\
-    | Close the cursor
-   \*/
+   /*
+   Close the cursor
+   */
    PROCEDURE unwrap;
    
    
-   /*\ 
-    | Returns a single line corresponding to a row from the cursor recordset or 
-    | the column headings. Call this function inside a loop to fetch all the 
-    | records from your cursor.
-    | Raises 'no_data_found' exception when the cursor is exausted. Surround the
-    | call to this routine with a PL/SQL block and catch this exception to quit
-    | the loop.
-    | The cursor is automatically closed before 'no_data_found' exception is 
-    | raised.
-   \*/
+   /* 
+   Returns a single line corresponding to a row from the cursor recordset or 
+   the column headings. Call this function inside a loop to fetch all the 
+   records from your cursor.
+   Raises 'no_data_found' exception when the cursor is exausted. Surround the
+   call to this routine with a PL/SQL block and catch this exception to quit
+   the loop.
+   The cursor is automatically closed before 'no_data_found' exception is 
+   raised.
+   */
    FUNCTION get_row RETURN VARCHAR2;
 
 

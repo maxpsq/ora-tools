@@ -1,5 +1,4 @@
-CREATE OR REPLACE
-PACKAGE BODY tabtext AS
+CREATE OR REPLACE PACKAGE BODY tabtext AS
 /**
 ___________     ___.         .__                 ___________              __   
 \__    ___/____ \_ |__  __ __|  | _____ _______  \__    ___/___ ___  ____/  |_ 
@@ -8,10 +7,10 @@ ___________     ___.         .__                 ___________              __
   |____|  (____  /___  /____/|____(____  /__|      |____| \___  >__/\_ \ |__|  
                \/    \/                \/                     \/      \/                                
                
-  a software by Massimo Pasquini                                   vers. 0.1-M1
+  a software by Massimo Pasquini                                   vers. 1.0-M2
   
   License                                                    Apache version 2.0                        
-  Last update                                                       2016-Feb-21
+  Last update                                                       2016-Feb-28
   
   Project homepage                          https://github.com/maxpsq/ora-tools
   
@@ -21,8 +20,12 @@ ___________     ___.         .__                 ___________              __
    SUBTYPE refcursor_number_t IS INTEGER;
    SUBTYPE refcursor_column_t IS PLS_INTEGER;
    SUBTYPE tab_row_t          IS varchar2_max_t;
+   
+   
+   COL_MODE_VAR_C   constant  natural := 0;
+   COL_MODE_FIX_C   constant  natural := 1;
 
-   g_sepval                   boolean not null := true;
+   g_column_mode              pls_integer := COL_MODE_VAR_C;
    g_fs                       varchar2(1) ;
    g_encl                     varchar2(1) ;
    g_esc                      varchar2(1) ;
@@ -34,13 +37,53 @@ ___________     ___.         .__                 ___________              __
    g_column_count             number;
    g_columns_metadata_empty   dbms_sql.desc_tab3;
    g_columns_metadata         dbms_sql.desc_tab3;
+   
+   type datatypes_len_aat is table of pls_integer index by varchar2(20);
+   g_datatypes_len_aa    datatypes_len_aat;
+   
+   procedure calculate_length is
+      l_max   pls_integer;
+      l_dummy pls_integer;
+   begin
+      -- For each month, I check the length of the string I get
+      -- from conversion
+      l_max := 0;
+      for i in 1..12 loop
+        l_dummy := length(to_char(to_date('2000'||i,'YYYYMM')-1));
+        l_max := greatest(l_dummy, l_max);
+      end loop;
+      g_datatypes_len_aa('DATE') := l_max;
+      
+      l_max := 0;
+      for i in 1..12 loop
+        l_dummy := length(to_char(to_timestamp('2000'||i,'YYYYMM')-1));
+        l_max := greatest(l_dummy, l_max);
+      end loop;
+      g_datatypes_len_aa('TIMESTAMP') := l_max;
+
+      l_max := 0;
+      for i in 1..12 loop
+        l_dummy := length(to_char(to_timestamp_tz('2000'||i,'YYYYMM')-1));
+        l_max := greatest(l_dummy, l_max);
+      end loop;
+      g_datatypes_len_aa('TIMESTAMPTZ') := l_max;
+   end;
 
 
    PROCEDURE RAISE_NO_CURSOR IS
    BEGIN
      RAISE_APPLICATION_ERROR(NO_CURSOR_EC, 'No cursor provided', true) ;
    END;
+
+   function is_fixed_column return boolean is
+   begin
+     return (g_column_mode = COL_MODE_FIX_C) ;
+   end;
    
+   function is_variable_column return boolean is
+   begin
+     return g_column_mode = COL_MODE_VAR_C ;
+   end;
    
    PROCEDURE reset_cursor IS
    BEGIN
@@ -56,13 +99,14 @@ ___________     ___.         .__                 ___________              __
       esc_in    IN varchar2 default '\'
    ) IS
    BEGIN
-      g_fs         := fs_in ;
-      g_encl       := encl_in ;
-      g_esc        := esc_in ;
-      g_sepval     := true;
-      g_head_on    := true;
+      g_fs           := fs_in ;
+      g_encl         := encl_in ;
+      g_esc          := esc_in ;
+      g_column_mode  := COL_MODE_VAR_C;
+      g_head_on      := true;
       g_head_printed := false;
-      g_headings   := headings_ntt() ;
+      g_headings     := headings_ntt() ;
+      calculate_length;
       reset_cursor ;
    END csv;
 
@@ -73,10 +117,10 @@ ___________     ___.         .__                 ___________              __
    END tsv;
 
 
-   PROCEDURE fixed_size IS
+   PROCEDURE fixed_size(fs_in varchar2 default '') IS
    BEGIN
-      csv('', '', '');
-      g_sepval := false;
+      csv(fs_in, '', '');
+      g_column_mode := COL_MODE_FIX_C;
    END fixed_size;
 
 
@@ -867,33 +911,36 @@ ___________     ___.         .__                 ___________              __
       align_in        char
    ) IS
 
-      FUNCTION escape(val_in varchar2) return varchar2 is
+      function escape(val_in varchar2) return varchar2 is
       begin
          return replace(val_in, g_encl, g_esc||g_encl);
       end escape;
 
-      FUNCTION enclose(val_in varchar2) return varchar2 is
-      BEGIN
+      function enclose(val_in varchar2) return varchar2 is
+        l_ret  varchar2(32767);
+      begin
          if ( g_encl is null) then
-            return val_in;
+            l_ret := val_in;
+         else   
+            l_ret := g_encl || escape(val_in) || g_encl;
          end if;
-         return g_encl || escape(val_in) || g_encl ;
-      END enclose;
+         return l_ret;
+      end enclose;
       
-      FUNCTION fixed_format(val_in varchar2, size_in binary_integer, align_in char) return varchar2 is
+      function fixed_format(val_in varchar2, size_in binary_integer, align_in char) return varchar2 is
       begin
          if ( align_in = 'R' ) then
            return lpad(nvl(val_in, ' '), size_in);
          else
            return rpad(nvl(val_in, ' '), size_in);
          end if;
-      end;
+      end fixed_format;
    
    BEGIN
-      if ( g_sepval ) then
-         if ( row_io is not null ) then
-            row_io := row_io || g_fs ;
-         end if;
+      if ( row_io is not null ) then
+         row_io := row_io || g_fs ; -- `g_fs` may be null
+      end if;
+      if ( is_variable_column ) then
          row_io := row_io || enclose(value_in);
       else
          row_io := row_io || fixed_format(value_in, size_in, align_in);
@@ -910,12 +957,38 @@ ___________     ___.         .__                 ___________              __
       END LOOP;
       RETURN l_headings;
    END default_headings;   
+
+
+   function column_length(
+      col_idx_in       in pls_integer 
+   ,  col_max_len_in   in pls_integer
+   ) return pls_integer is
+      l_ret         pls_integer;
+      l_format_len  pls_integer;
+      l_dummy       pls_integer;
+   begin
+      IF is_date (col_idx_in) THEN
+         l_ret := greatest(col_max_len_in, g_datatypes_len_aa('DATE'));
+      ELSIF is_timest (col_idx_in) THEN
+         l_ret := greatest(col_max_len_in, g_datatypes_len_aa('TIMESTAMP'));
+      ELSIF is_timest_tz (col_idx_in) THEN
+         l_ret := greatest(col_max_len_in, g_datatypes_len_aa('TIMESTAMPTZ'));
+      ELSIF is_timest_ltz (col_idx_in) THEN
+         l_ret := greatest(col_max_len_in, g_datatypes_len_aa('TIMESTAMPTZ'));
+      ELSE
+         l_ret := col_max_len_in;
+      END IF;
+      return l_ret;
+   end;
+   
+
    
    
    FUNCTION print_headings RETURN VARCHAR2 IS
-      l_row   tab_row_t;
-      l_ind   headings_ind_t;
-      l_lr    char(1) ;
+      l_row       tab_row_t;
+      l_ind       headings_ind_t;
+      l_lr        char(1) ;
+      l_max_len   pls_integer;
    BEGIN
       l_ind := g_headings.FIRST;
       WHILE (l_ind <= g_headings.LAST) LOOP
@@ -923,7 +996,8 @@ ___________     ___.         .__                 ___________              __
          if ( is_numeric(l_ind) ) then
             l_lr := 'R';
          end if;
-         add_column( l_row, g_headings(l_ind), g_columns_metadata(l_ind).col_max_len, l_lr);
+         l_max_len := column_length(l_ind, g_columns_metadata(l_ind).col_max_len);
+         add_column( l_row, g_headings(l_ind), l_max_len, l_lr);
          l_ind := g_headings.NEXT(l_ind);
       END LOOP;
       g_head_printed := TRUE;
@@ -978,7 +1052,7 @@ ___________     ___.         .__                 ___________              __
          ELSIF is_urowid (l_col_idx) THEN
             DBMS_SQL.DEFINE_COLUMN (g_rcn, l_col_idx, l_urowid_value);
          ELSE
-            raise_application_error(-20102, '<UNH-TYPE-'||g_columns_metadata(l_col_idx).col_type||'>');
+            raise_application_error(-20102, '<UNK-TYPE-'||g_columns_metadata(l_col_idx).col_type||'>');
          END IF;
       END LOOP;
 
@@ -995,7 +1069,7 @@ ___________     ___.         .__                 ___________              __
       end if;
    END unwrap;
    
-
+   
    FUNCTION get_row RETURN VARCHAR2 IS
    
       l_row            tab_row_t;
@@ -1003,9 +1077,9 @@ ___________     ___.         .__                 ___________              __
       l_lr             char(1);  -- Left/Right alignment
       l_fdbk           INTEGER;
       
-      l_string_value      tab_row_t;
-      l_numeric_value     NUMBER;   
-      
+      l_string_value   tab_row_t;
+      l_numeric_value  NUMBER;   
+      l_max_len        PLS_INTEGER;
    BEGIN
       IF ( g_rcn IS NULL ) THEN
          RAISE_NO_CURSOR;
@@ -1020,6 +1094,7 @@ ___________     ___.         .__                 ___________              __
       END IF;
       FOR l_col_idx IN 1 .. g_column_count LOOP
          l_lr := 'L';
+         l_max_len := column_length(l_col_idx, g_columns_metadata(l_col_idx).col_max_len);
          IF is_string (l_col_idx) THEN
             DBMS_SQL.COLUMN_VALUE (g_rcn, l_col_idx, l_string_value);
          ELSIF is_numeric (l_col_idx) THEN
@@ -1044,7 +1119,7 @@ ___________     ___.         .__                 ___________              __
          ELSE
             l_string_value := '<UNH-FMT-'||g_columns_metadata(l_col_idx).col_type||'>';
          END IF;
-         add_column(l_row, l_string_value, g_columns_metadata(l_col_idx).col_max_len, l_lr);
+         add_column(l_row, l_string_value, l_max_len, l_lr);
       END LOOP;
       RETURN l_row ;
    END get_row;
