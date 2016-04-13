@@ -10,3 +10,6 @@ Easily wrap your query resultsets into XML based spreadsheets. Supports Microsof
 ### NLS_MEM
 Save the national language support (NLS) parameters set within your Oracle session in a stack-organized memory so you can easily alter your 
 session environment and then restore everything back as it was before altering.
+
+### AS_ZIP
+Utility for file compression in ZIP format (zlib-format, Lempel-Ziv compression algorithm) by Anton Scheffer.
