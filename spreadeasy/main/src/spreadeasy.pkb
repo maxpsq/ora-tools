@@ -334,6 +334,7 @@ package body spreadeasy as
 
       procedure cleanup_this_routine is
       begin
+         commit;
          rollback; -- Notice this routine starts an AUTONOMOUS TRANSACTION !
          restore_excel_session_params;
       end cleanup_this_routine;

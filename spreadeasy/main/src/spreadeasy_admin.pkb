@@ -60,8 +60,12 @@ package body spreadeasy_admin is
    procedure load_excel_xslt is
    begin
       load_xslt(spreadeasy.Excel, 
-               'Microsoft Office XML Spreadsheet (XMLSS, Excel 2002/XP)', 
+               'Microsoft Office XML Spreadsheet (Excel 2002 / Office XP)', 
                ORA_DIRNAME, 'xmlss.xsl', 'AL32UTF8');
+
+      load_xslt(spreadeasy.ODS, 
+               'Open Document Spreadsheet', 
+               ORA_DIRNAME, 'ods-content.xsl', 'AL32UTF8');
    end;
 
 

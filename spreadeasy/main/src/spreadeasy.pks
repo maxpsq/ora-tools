@@ -35,7 +35,7 @@ package spreadeasy as
 
    
    Excel        CONSTANT  style_t := 1 ;
--- Calc         CONSTANT  style_t := 2 ;
+   ODS          CONSTANT  style_t := 2 ;
 
 
    subtype execution_time_t   is INTERVAL DAY(1) TO SECOND(9);
@@ -66,10 +66,6 @@ package spreadeasy as
       author_in    in varchar2 default user, 
       company_in   in varchar2 default ''
    );
-
-
-   /** Set a spreadsheet style (1=Excel) */
-   procedure setStyle(style_in  in  style_t);
    
 
    /** Return the spreadsheet style previously set (1=Excel) */

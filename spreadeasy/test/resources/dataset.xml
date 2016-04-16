@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SPREADSHEET>
+  <ROWSET>
+    <ROW>
+      <Author>SPREADEASY</Author>
+      <LastAuthor>SPREADEASY</LastAuthor>
+      <Created>2016-04-16T14:49:57Z</Created>
+      <LastSaved>2016-04-16T14:49:57Z</LastSaved>
+      <Version>1</Version>
+    </ROW>
+  </ROWSET>
+  <ROWSET worksheet_name="Worksheet 1">
+    <ROW>
+      <Dipartimento type="String" column_heading="Dipartimento">Administration</Dipartimento>
+      <ID_x003E_capo type="Number" column_heading="ID&gt;capo">200</ID_x003E_capo>
+    </ROW>
+    <ROW>
+      <Dipartimento type="String" column_heading="Dipartimento">Marketing</Dipartimento>
+      <ID_x003E_capo type="Number" column_heading="ID&gt;capo">201</ID_x003E_capo>
+    </ROW>
+    <ROW>
+      <Dipartimento type="String" column_heading="Dipartimento">Purchasing</Dipartimento>
+      <ID_x003E_capo type="Number" column_heading="ID&gt;capo">114</ID_x003E_capo>
+    </ROW>
+  </ROWSET>
+  <ROWSET worksheet_name="Worksheet 2">
+    <ROW>
+      <HIRE type="DateTime" column_heading="HIRE">1994-08-17T00:00:00.000</HIRE>
+      <Cognome type="String" column_heading="Cognome">Greenberg</Cognome>
+    </ROW>
+    <ROW>
+      <HIRE type="DateTime" column_heading="HIRE">1994-08-16T00:00:00.000</HIRE>
+      <Cognome type="String" column_heading="Cognome">Faviet</Cognome>
+    </ROW>
+    <ROW>
+      <HIRE type="DateTime" column_heading="HIRE">1997-09-28T00:00:00.000</HIRE>
+      <Cognome type="String" column_heading="Cognome">Chen</Cognome>
+    </ROW>
+    <ROW>
+      <HIRE type="DateTime" column_heading="HIRE">1997-09-30T00:00:00.000</HIRE>
+      <Cognome type="String" column_heading="Cognome">Sciarra</Cognome>
+    </ROW>
+    <ROW>
+      <HIRE type="DateTime" column_heading="HIRE">1998-03-07T00:00:00.000</HIRE>
+      <Cognome type="String" column_heading="Cognome">Urman</Cognome>
+    </ROW>
+    <ROW>
+      <HIRE type="DateTime" column_heading="HIRE">1999-12-07T00:00:00.000</HIRE>
+      <Cognome type="String" column_heading="Cognome">Popp</Cognome>
+    </ROW>
+  </ROWSET>
+</SPREADSHEET>
