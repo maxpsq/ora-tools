@@ -37,20 +37,6 @@
 <ownDataTypeParameters>60 CHAR,,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
-<Column name="DOCUMENT" id="741699BE-6DCF-EF5B-8B68-F5932FD0C3D3">
-<createdBy>max</createdBy>
-<createdTime>2016-02-21 16:32:28 UTC</createdTime>
-<comment>XSLT Document</comment>
-<commentInRDBMS>XSLT Document</commentInRDBMS>
-<generatorID>Generato dall&apos;utente</generatorID>
-<ownerDesignName>spreadeasy</ownerDesignName>
-<nullsAllowed>true</nullsAllowed>
-<useDomainConstraints>false</useDomainConstraints>
-<use>1</use>
-<logicalDatatype>LOGDT050</logicalDatatype>
-<ownDataTypeParameters>,,</ownDataTypeParameters>
-<autoIncrementCycle>false</autoIncrementCycle>
-</Column>
 </columns>
 <indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
 <ind_PK_UK id="18669ADC-F34F-5A5D-2C0E-9D8923B43B9B" name="SPREADEASY_STYLES_PK">

@@ -8,7 +8,7 @@ package body spreadeasy as
 ███████║██║     ██║  ██║███████╗██║  ██║██████╔╝███████╗██║  ██║███████║   ██║   
 ╚══════╝╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   
 
-  a software by Massimo Pasquini                                   vers. 1.0-M2
+  a software by Massimo Pasquini                                   vers. 1.0-M3
   
   License                                                    Apache version 2.0
   Last update                                                       2016-Feb-23
@@ -16,6 +16,8 @@ package body spreadeasy as
   Project homepage                          https://github.com/maxpsq/ora-tools
 
 */
+
+   C_SCHEMA_OWNER    CONSTANT  varchar2(30) := sys_context('userenv','current_schema');
 
    subtype datetime_fmt_t is VARCHAR2(30);
 
@@ -90,7 +92,7 @@ package body spreadeasy as
       alter_session('nls_timestamp_tz_format', 'YYYY-MM-DD"T"HH24:MI:SS.FF3');
       -- In order ALTER SESSION SET NLS_NUMERIC_CHARACTERS to take
       -- effect is VERY important to set its value BEFORE opening any cursor
-      -- variable. Remember cursors are opened in `addWorksheet`
+      -- variable. Remember cursors are opened in `addWorksheet` procedure.
       alter_session('nls_numeric_characters' , '.,');
    end;
    
@@ -171,23 +173,25 @@ package body spreadeasy as
    end;
    
    
-   procedure newExcel(
+   procedure newODS(
       author_in    in varchar2 default user, 
       company_in   in varchar2 default ''
    ) is  
    begin
-      newWorkbook(Excel, author_in, company_in);
+      newWorkbook(ODS, author_in, company_in);
    end;
 
-
-   function get_style_xslt(style_in  in  style_t) return XMLType 
+    -- TODO GET_BUILDER
+   function get_xml_builder(
+      style_in  in  style_t, 
+      step_in   in  SPREADEASY_BUILDERS.step%type
+   ) return XMLType 
    is
-      l_dburi    varchar2(512);
       l_style    style_t NOT NULL := style_in;
-      l_owner    varchar2(30);
+      l_step     SPREADEASY_BUILDERS.step%type NOT NULL := step_in;
+      l_dburi    varchar2(512);
    begin
-      l_owner := sys_context('userenv','current_schema');
-      l_dburi := '/'||l_owner||'/SPREADEASY_STYLES/ROW[STYLE_ID="'||l_style||'"]/DOCUMENT/text()';
+      l_dburi := '/'||C_SCHEMA_OWNER||'/SPREADEASY_BUILDERS/ROW[STYLE_ID="'||l_style||'" AND STEP="'||l_step||'"]/DOCUMENT/text()';
       return DBURIType(l_dburi).getXML(l_dburi);
    end;
 
@@ -272,7 +276,7 @@ package body spreadeasy as
             l_buf   CLOB;
          begin
             l_buf := to_clob('<xsl:template match="'||xml_safe_tag_name(column_name_in)||'">');
-            dbms_lob.append(l_buf, to_clob('<xsl:copy><xsl:attribute name="type">'||type_in||'</xsl:attribute>'));
+            dbms_lob.append(l_buf, to_clob('<xsl:copy><xsl:attribute name="oratype">'||type_in||'</xsl:attribute>'));
             dbms_lob.append(l_buf, to_clob('<xsl:attribute name="column_heading">'||htf.escape_sc(column_name_in)||'</xsl:attribute>'));
             dbms_lob.append(l_buf, to_clob('<xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
             return l_buf;
@@ -314,22 +318,38 @@ package body spreadeasy as
          end if;  
       end;
       
-      function dbms_sql2excel_type(oradt_in in binary_integer) return varchar2 is
+      function dbms_sql2ora_type(oradt_in in binary_integer) return varchar2 is
         l_ret   varchar2(50);
       begin
         case oradt_in
-          when dbms_sql.number_type            then l_ret := 'Number';
-          when dbms_sql.binary_float_type      then l_ret := 'Number';
-          when dbms_sql.binary_double_type     then l_ret := 'Number';
-          when dbms_sql.date_type              then l_ret := 'DateTime';
-          when dbms_sql.Timestamp_Type         then l_ret := 'DateTime';
-          when dbms_sql.Timestamp_With_TZ_Type then l_ret := 'DateTime';
-          when dbms_sql.Timestamp_With_Local_TZ_Type then l_ret := 'DateTime';
+          when dbms_sql.varchar2_type          then l_ret := 'VARCHAR2';
+          when dbms_sql.number_type            then l_ret := 'NUMBER';
+          when dbms_sql.long_type              then l_ret := 'LONG';
+          when dbms_sql.rowid_type             then l_ret := 'ROWID';
+          when dbms_sql.date_type              then l_ret := 'DATE';
+          when dbms_sql.raw_type               then l_ret := 'RAW';
+          when dbms_sql.long_raw_type          then l_ret := 'LONG RAW';
+          when dbms_sql.char_type              then l_ret := 'CHAR';
+          when dbms_sql.binary_float_type      then l_ret := 'BINARY FLOAT';
+          when dbms_sql.binary_double_type     then l_ret := 'BINARY DOUBLE';
+          when dbms_sql.MLSLabel_type          then l_ret := 'MLSLABEL';
+          when dbms_sql.User_Defined_type      then l_ret := 'USER DEFINED';
+          when dbms_sql.Ref_type               then l_ret := 'REF';
+          when dbms_sql.clob_type              then l_ret := 'CLOB';
+          when dbms_sql.blob_type              then l_ret := 'BLOB';
+          when dbms_sql.bfile_type             then l_ret := 'BFILE';
+          when dbms_sql.Timestamp_Type         then l_ret := 'TIMESTAMP';
+          when dbms_sql.Timestamp_With_TZ_Type then l_ret := 'TIMESTAMP WITH TIME ZONE';
+          when dbms_sql.Timestamp_With_Local_TZ_Type then l_ret := 'TIMESTAMP WITH LOCAL TIME ZONE';
+          when dbms_sql.Interval_Year_To_Month_Type then l_ret := 'INTERVAL YEAR TO MONTH';
+          when dbms_sql.Interval_Day_To_Second_Type then l_ret := 'INTERVAL DAY TO SECOND';
+          when dbms_sql.urowid_type            then l_ret := 'UROWID';
+          when dbms_sql.binary_bouble_type     then l_ret := 'BINARY BOUBLE';
           else
-            l_ret := 'String';
+            l_ret := '<UNHANDLED>';
         end case;  
         return l_ret;
-      end dbms_sql2excel_type;
+      end dbms_sql2ora_type;
       
 
       procedure cleanup_this_routine is
@@ -354,7 +374,8 @@ package body spreadeasy as
              to_char(g_doc_props_rec.created, EXCEL_PROP_DATETIME_FMT) as "Created",
              to_char(g_doc_props_rec.created, EXCEL_PROP_DATETIME_FMT) as "LastSaved",
              g_doc_props_rec.company as "Company",
-             1 as "Version"
+             1 as "Version",
+             C_GENERATOR as "Generator"
         from dual;
       
       l_xmlctx := DBMS_XMLGEN.newContext(l_dummy_cur);
@@ -369,7 +390,7 @@ package body spreadeasy as
          
          dbms_sql.describe_columns2(c => l_ws_rec.refcur, col_cnt => l_col_cnt, desc_t => l_desc_tab);   
          for i in 1 .. l_col_cnt loop
-            l_dummy_coldt(l_desc_tab(i).col_name) := dbms_sql2excel_type(l_desc_tab(i).col_type);
+            l_dummy_coldt(l_desc_tab(i).col_name) := dbms_sql2ora_type(l_desc_tab(i).col_type);
          end loop;
          l_datatype_xslt := datatype_injection(l_ws_rec, l_dummy_coldt);
                

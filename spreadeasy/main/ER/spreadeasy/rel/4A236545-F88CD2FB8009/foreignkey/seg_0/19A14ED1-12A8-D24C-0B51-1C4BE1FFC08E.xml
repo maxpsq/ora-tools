@@ -1,0 +1,15 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="19A14ED1-12A8-D24C-0B51-1C4BE1FFC08E" containerWithKeyObject="52598793-1DCD-09C9-9AF8-2D789283283B" localFKIndex="58716DCA-43DE-A86D-E77A-8640F6A57C9D" name="SPREADEASY$BUILDERS_STYLES_FK">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:45:24 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<deleteRule>NO ACTION</deleteRule>
+<referredTableID>57BD19D4-9A84-79D6-2948-CF081C89FEFC</referredTableID>
+<keyObject>18669ADC-F34F-5A5D-2C0E-9D8923B43B9B</keyObject>
+<referredKeyID>18669ADC-F34F-5A5D-2C0E-9D8923B43B9B</referredKeyID>
+<mandatory>true</mandatory>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

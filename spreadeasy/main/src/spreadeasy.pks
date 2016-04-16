@@ -8,7 +8,7 @@ package spreadeasy as
 ███████║██║     ██║  ██║███████╗██║  ██║██████╔╝███████╗██║  ██║███████║   ██║   
 ╚══════╝╚═╝     ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   
 
-  a software by Massimo Pasquini                                   vers. 1.0-M2
+  a software by Massimo Pasquini                                   vers. 1.0-M3
   
   License                                                    Apache version 2.0
   Last update                                                       2016-Feb-23
@@ -16,6 +16,8 @@ package spreadeasy as
   Project homepage                          https://github.com/maxpsq/ora-tools
 
 */
+
+   C_GENERATOR   constant varchar2(64) := 'Spreadeasy v1.0-M3';
 
    TYPE doc_props_rt is record(
       author      varchar2(128),
@@ -61,8 +63,8 @@ package spreadeasy as
    );   
    
    
-   /** Initialize a new Excel spreadsheet setting author and company name */
-   procedure newExcel(
+   /** Initialize a new ODS spreadsheet, setting author and company name */
+   procedure newODS(
       author_in    in varchar2 default user, 
       company_in   in varchar2 default ''
    );

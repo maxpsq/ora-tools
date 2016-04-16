@@ -1,4 +1,5 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <oracle.dbtools.crest.model.design.relational.RelationalDesign>
+   <object objectType="Table" objectID="B05836CF-6418-1177-5D45-425F616CA9DB" name="SPREADEASY_TEST_CASE" seqName="seg_0"/>
    <object objectType="Table" objectID="C1107443-38C6-8FC5-52B8-F0E6A1898C61" name="SPREADEASY_TEST_RESULTS" seqName="seg_0"/>
 </oracle.dbtools.crest.model.design.relational.RelationalDesign>

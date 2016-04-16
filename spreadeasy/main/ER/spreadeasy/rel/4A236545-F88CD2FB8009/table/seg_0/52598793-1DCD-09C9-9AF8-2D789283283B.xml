@@ -1,0 +1,134 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="52598793-1DCD-09C9-9AF8-2D789283283B" name="SPREADEASY_BUILDERS">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:30:43 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<ordsAlias>table_3</ordsAlias>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="STYLE_ID" id="D2D48C44-BCF0-125F-F3A7-6D18CCB78121">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:45:24 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>3</dataTypePrecision>
+<ownDataTypeParameters>,3,</ownDataTypeParameters>
+<previousColumn>false</previousColumn>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="19A14ED1-12A8-D24C-0B51-1C4BE1FFC08E" referredColumn="937E6C7D-5934-4C5E-E7CF-A4768699C516"/>
+</associations>
+</Column>
+<Column name="STEP" id="D04322BE-6AA2-2B73-C654-6ED52E77F333">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:35:23 UTC</createdTime>
+<comment>Building step number</comment>
+<commentInRDBMS>Building step number</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<dataTypePrecision>3</dataTypePrecision>
+<ownDataTypeParameters>,3,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="BILDER_TYPE" id="55D7DA47-4046-F200-1530-59975C2D755C">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:40:36 UTC</createdTime>
+<comment>Builder type</comment>
+<commentInRDBMS>Builder type</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>3 CHAR</dataTypeSize>
+<ownDataTypeParameters>3 CHAR,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="XML_DOC" id="206ECDB1-9A20-A711-E343-EF9101406430">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:36:22 UTC</createdTime>
+<comment>XML Document, usually a XSL</comment>
+<commentInRDBMS>XML Document, usually a XSL</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT050</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="BUILDER_DOC" id="BDCA556E-2C2A-9B0D-0CCF-FF785B5DDFE8">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:39:43 UTC</createdTime>
+<comment>File Content</comment>
+<commentInRDBMS>File Content</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT028</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="OUT_PATH" id="A3C244BD-A15C-D053-3E7F-72A423233A6E">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:35:24 UTC</createdTime>
+<comment>Output path</comment>
+<commentInRDBMS>Output path</commentInRDBMS>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>255 CHAR</dataTypeSize>
+<ownDataTypeParameters>255 CHAR,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="F1FC3423-65F0-A19B-1AF7-5DA2146360B3" name="SPREADEASY_BUILDERS_PK">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:47:02 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<pk>true</pk>
+<indexState>Primary Constraint</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="D2D48C44-BCF0-125F-F3A7-6D18CCB78121"/>
+<colUsage columnID="D04322BE-6AA2-2B73-C654-6ED52E77F333"/>
+</indexColumnUsage>
+</ind_PK_UK>
+<ind_PK_UK id="58716DCA-43DE-A86D-E77A-8640F6A57C9D" name="SPREADEASY$BUILDERS_STYLES_FK">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:45:24 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="D2D48C44-BCF0-125F-F3A7-6D18CCB78121"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+<tableCheckConstraints itemClass="oracle.dbtools.crest.model.design.constraint.TableLevelConstraint">
+<tableCheckConstraint name="SPREADEASY_BUILDERS_CK_1" directorySegmentName="seg_0" id="525D9C78-7E43-19A0-0C62-8FD1A4991A20">
+<createdBy>max</createdBy>
+<createdTime>2016-04-16 16:44:43 UTC</createdTime>
+<generatorID>Generato dall&apos;utente</generatorID>
+<ownerDesignName>spreadeasy</ownerDesignName>
+<rule>BUILDER_TYPE IN (&apos;TXT&apos;, &apos;XSL&apos;, &apos;XML&apos;)</rule>
+</tableCheckConstraint>
+</tableCheckConstraints>
+</Table>

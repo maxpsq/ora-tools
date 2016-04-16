@@ -2,7 +2,7 @@
 
 
 ## What SpreadEasy is
-It's a simple tool to easily serialize a cursor result set to [Microsoft Office XML Spreadsheet (XMLSS)](https://en.wikipedia.org/wiki/Microsoft_Office_XML_formats) format (Microsoft Excel 2002, not to be confused with "Office Open XML Format").
+It's a simple tool to easily serialize a cursor result set to [Open Document Spreadsheet](https://it.wikipedia.org/wiki/OpenDocument) format (OASIS Open Document Format for Office Applications).
 Just define as many cursor variables as you wish, wrap each of them in a named worksheet and build your spreadsheet.
 
 
@@ -12,8 +12,7 @@ move to a specific cell and set its value nor to write formulas or such. Spreade
 
 
 ## How it works
-SpreadEasy relies on Oracle XML DB. The cursors provided are just used to generate XML documents
-via DBMS_XML package and then transformed to a spreadsheet via XSLT.
+SpreadEasy relies on Oracle XML DB. The cursors provided are just used to generate XML documents via DBMS_XML package and then transformed to a spreadsheet via XSLT.
 
 
 ## How to use it
@@ -27,7 +26,7 @@ declare
   spreadsheet_clob  CLOB;
 begin
   -- Initilize your Document (document properties are optional)
-  spreadeasy.newExcel('Massimo Pasquini', 'ACME Industries'); 
+  spreadeasy.newODS('Massimo Pasquini', 'ACME Industries'); 
 
   -- Open a cursor variable... (1)
   Open l_emp_cur for 
@@ -81,14 +80,6 @@ original settings after the spreadsheet is built (after call
 to `build`).
 
 
-(2) DISCLAIMER 
-how to write your spreadsheet to a file is out of the scope
-of Spreadeasy. You'll probably already have a routine to get
-the job done, so I just wanted to avoid this package to grow
-over the necessary size.
-In case you don't have such a routine, just google for:
-'Oracle save CLOB to file'.
-
 */
 ```
 
@@ -114,7 +105,7 @@ finally, run this script
 begin
   spreadeasy_admin.set_resource_dir('/your/absolute/path/to/ora-tools/spreadeasy/main/resources');
   -- automatically issues a commit in an autonomous transaction
-  spreadeasy_admin.load_excel_xslt; 
+  spreadeasy_admin.load_all_builders; 
 end;
 /
 ```
