@@ -94,14 +94,23 @@ package body spreadeasy_admin is
       charset_in       in varchar2
    ) is
       pragma autonomous_transaction;
+      
       l_bfile    bfile;
       l_clob     CLOB;
+
+      procedure clean_up is
+      begin
+         dbms_lob.freetemporary( l_clob );  
+         if ( 1 = DBMS_LOB.isopen(l_bfile) ) then
+            DBMS_LOB.CLOSE(l_bfile);   
+         end if;
+      end;
+      
    begin 
       l_bfile := bfilename(dir_in, fname_in);
       DBMS_LOB.OPEN (l_bfile);
       DBMS_LOB.CREATETEMPORARY (l_clob, TRUE, DBMS_LOB.SESSION);
-      DBMS_LOB.LOADFROMFILE (l_clob, l_bfile, DBMS_LOB.GETLENGTH (l_bfile));
-      DBMS_LOB.CLOSE (l_bfile);   
+      DBMS_LOB.LOADFROMFILE (l_clob, l_bfile, DBMS_LOB.GETLENGTH(l_bfile));
       merge into spreadeasy_builders d
          using ( select l_clob           as builder_doc
                       , step_in          as step
@@ -119,9 +128,11 @@ package body spreadeasy_admin is
             insert (d.style_id, d.step, d.builder_type, d.out_path, d.builder_doc)
             values (s.style_id, s.step, s.builder_type, s.out_path, s.builder_doc);
       commit; 
+      clean_up;    
    exception
-     when others then
-       raise;
+      when others then
+         clean_up;    
+         raise;
    end; 
 
   
@@ -144,9 +155,9 @@ package body spreadeasy_admin is
                        ORA_DIRNAME, 'ods-styles.xml', 'AL32UTF8');
       load_xml_builder(l_style_id, 7, 'XSL', 'settings.xml', 
                        ORA_DIRNAME, 'ods-settings.xsl', 'AL32UTF8');
-      -- Notice `current.xml` is an empty file 
-      load_txt_builder(l_style_id, 8, 'TXT', 'Configurations2/accelerator/current.xml', 
-                       ORA_DIRNAME, 'ods-current.xml', 'AL32UTF8');
+      -- Notice `current.xml` is an empty file. For this reasone, gives an error. 
+--      load_txt_builder(l_style_id, 8, 'TXT', 'Configurations2/accelerator/current.xml', 
+--                       ORA_DIRNAME, 'ods-current.xml', 'AL32UTF8');
    end;
 
 

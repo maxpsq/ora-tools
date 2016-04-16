@@ -180,7 +180,7 @@ package body spreadeasy as
    begin
       newWorkbook(ODS, author_in, company_in);
    end;
-
+/*
     -- TODO GET_BUILDER
    function get_xml_builder(
       style_in  in  style_t, 
@@ -194,7 +194,7 @@ package body spreadeasy as
       l_dburi := '/'||C_SCHEMA_OWNER||'/SPREADEASY_BUILDERS/ROW[STYLE_ID="'||l_style||'" AND STEP="'||l_step||'"]/DOCUMENT/text()';
       return DBURIType(l_dburi).getXML(l_dburi);
    end;
-
+*/
 
    procedure format(style_in  in  style_t) is
    begin
@@ -242,14 +242,35 @@ package body spreadeasy as
       return g_ss_style;
    end;
    
+   
+   procedure addToZip(
+      zip_blob_io   IN OUT NOCOPY BLOB, 
+      data_clob_in  IN            CLOB,
+      path_in       spreadeasy_builders.out_path%type
+   ) is
+     l_data_blob   BLOB;
+     l_dest_offset INTEGER := 1;
+     l_src_offset  INTEGER := 1;
+     l_ctxt        INTEGER;
+     l_warn        INTEGER;
+     l_csid        NUMBER := nls_charset_id('UTF8');
+   begin
+      DBMS_LOB.convertToBlob(
+            l_data_blob, data_clob_in, 
+            DBMS_LOB.getlength(data_clob_in), l_dest_offset, l_src_offset, 
+            l_csid, l_ctxt, l_warn);
+      as_zip.add1file( zip_blob_io, path_in, l_data_blob );
+   end;
+   
 
-   procedure build 
+   procedure build(dir_in  varchar2, filename_in varchar2) 
    is
    
       EXCEL_PROP_DATETIME_FMT  CONSTANT datetime_fmt_t := 'YYYY-MM-DD"T"HH24:MI:SS"Z"';
    
       l_spreadsheet_xslt   XMLType;
-      l_datatype_xslt      XMLType;
+      l_dummy_xml          XMLType;
+      l_dataset            XMLType;
       l_ws_rec             worksheet_rec_t;
       l_ws_idx             worksheet_idx_t;  
       l_ss_id              spreadeasy_wrk.spreadsheet_id%type;
@@ -260,6 +281,7 @@ package body spreadeasy as
       l_dummy_coldt        column_datatypes_aat ;
       l_col_cnt            PLS_INTEGER;
       l_desc_tab           dbms_sql.desc_tab2;
+      l_zip_content        BLOB;
       
       PRAGMA AUTONOMOUS_TRANSACTION;
       
@@ -354,8 +376,9 @@ package body spreadeasy as
 
       procedure cleanup_this_routine is
       begin
-         commit;
+         commit;   -- TODO: *** REMOVE THE COMMIT ***
          rollback; -- Notice this routine starts an AUTONOMOUS TRANSACTION !
+         dbms_lob.freetemporary( l_zip_content );        
          restore_excel_session_params;
       end cleanup_this_routine;
 
@@ -392,28 +415,48 @@ package body spreadeasy as
          for i in 1 .. l_col_cnt loop
             l_dummy_coldt(l_desc_tab(i).col_name) := dbms_sql2ora_type(l_desc_tab(i).col_type);
          end loop;
-         l_datatype_xslt := datatype_injection(l_ws_rec, l_dummy_coldt);
+         l_dummy_xml := datatype_injection(l_ws_rec, l_dummy_coldt);
                
          l_dummy_cur := dbms_sql.to_refcursor(l_ws_rec.refcur);
          l_xmlctx := DBMS_XMLGEN.newContext(l_dummy_cur);
-         gen_xml_fragment(l_ss_id, l_ws_idx, l_xmlctx, l_datatype_xslt);
+         gen_xml_fragment(l_ss_id, l_ws_idx, l_xmlctx, l_dummy_xml);
          DBMS_XMLGEN.CLOSECONTEXT(l_xmlctx);
          close l_dummy_cur;  
          
          l_ws_idx := g_worksheets_nt.NEXT(l_ws_idx);
       end loop;
 
-      l_spreadsheet_xslt := get_style_xslt(g_ss_style);
 
-      select XMLRoot(XMLtransform( 
-                         XMLELEMENT("SPREADSHEET", XMLAGG(document)),
-                         l_spreadsheet_xslt), 
-                     VERSION '1.0') as xml
-        into g_spreadsheet 
+      select XMLRoot(XMLELEMENT("SPREADSHEET", XMLAGG(document)), VERSION '1.0') as xml
+        into l_dataset
         from spreadeasy_wrk
        where spreadsheet_id = l_ss_id
        order by worksheet_id;
-        
+       
+      for builder_rec in (select * 
+                            from spreadeasy_builders b 
+                           where b.style_id = getStyle
+                           order by b.step ) 
+      loop
+      
+         case builder_rec.builder_type
+            when 'TXT' then
+               addToZip(l_zip_content, builder_rec.builder_doc, builder_rec.out_path);
+            when 'XML' then
+               addToZip(l_zip_content, builder_rec.xml_doc.getCLOBVal(), builder_rec.out_path);
+            when 'XSL' then
+               select XMLRoot(XMLtransform(l_dataset, builder_rec.xml_doc), VERSION '1.0') as xml
+                 into l_dummy_xml
+                 from dual;
+-- TODO:FIX: the first call to `addToZip` raises an eror                 
+               addToZip(l_zip_content, l_dummy_xml.getCLOBVal(), builder_rec.out_path);
+         end case;
+
+      
+      end loop;
+      
+      as_zip.finish_zip( l_zip_content );
+      as_zip.save_zip( l_zip_content, dir_in, filename_in );
       cleanup_this_routine;
       g_execution_time := systimestamp - g_start_time;
    exception

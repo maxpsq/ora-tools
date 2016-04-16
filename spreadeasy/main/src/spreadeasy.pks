@@ -88,8 +88,9 @@ package spreadeasy as
    );
    
    
-   /** Build the spreadsheet using the cursor passed to each worksheet */
-   procedure build ;
+   /** Build the spreadsheet using the cursors passed to each worksheet
+       and save it to disk at the given location */
+   procedure build(dir_in  varchar2, filename_in varchar2); 
    
    
    /** Get the generated spreadsheet as a XMLType variable */
