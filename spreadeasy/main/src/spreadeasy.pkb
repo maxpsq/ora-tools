@@ -98,7 +98,7 @@ package body spreadeasy as
    end;
    
    
-   procedure restore_excel_session_params is
+   procedure restore_session_params is
    begin
       restore_session_param('nls_date_format');
       restore_session_param('nls_timestamp_format');
@@ -198,13 +198,25 @@ package body spreadeasy as
       name_in      in     worksheet_name_t DEFAULT null
    ) is
      l_worksheet_rec   worksheet_rec_t;
+     l_worksheet_name  worksheet_name_t;
+     i                 pls_integer ;
    begin
       begin
+         l_worksheet_name := nvl(name_in, 'Worksheet '||to_char(g_worksheets_nt.COUNT+1));
          -- TODO check wheather the 'worksheet name' is already in use
+         << CHECK_AGAIN >>
+         i := 1;
+         while ( i <= g_worksheets_nt.LAST ) loop
+            if ( g_worksheets_nt(i).name = l_worksheet_name ) then 
+              l_worksheet_name := l_worksheet_name||' (2)';
+              goto CHECK_AGAIN;
+            end if;
+            i := g_worksheets_nt.NEXT(i);
+         end loop;
          raise no_data_found;
       exception
          when no_data_found then
-            l_worksheet_rec.name := nvl(name_in, 'Worksheet '||to_char(g_worksheets_nt.COUNT+1));
+            l_worksheet_rec.name := l_worksheet_name;
             l_worksheet_rec.refcur := dbms_sql.to_cursor_number(sqlCursor_io);
             g_worksheets_nt.EXTEND;
             g_worksheets_nt(g_worksheets_nt.LAST) := l_worksheet_rec;
@@ -275,6 +287,7 @@ package body spreadeasy as
       begin
          l_buf := to_clob('<?xml version="1.0" encoding="UTF-8"?>');
          dbms_lob.append(l_buf, to_clob('<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" >'));
+         dbms_lob.append(l_buf, to_clob('<xsl:output method="xml" indent="yes" encoding="utf-8"/>'));
          dbms_lob.append(l_buf, to_clob('<xsl:template match="/*"><xsl:copy><xsl:attribute name="worksheet_name">'||htf.escape_sc(worksheet_rec_in.name)||'</xsl:attribute><xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
          dbms_lob.append(l_buf, to_clob('<xsl:template match="ROW"><xsl:copy><xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
          l_colname := column_datatypes_aa_in.FIRST;
@@ -344,10 +357,9 @@ package body spreadeasy as
 
       procedure cleanup_this_routine is
       begin
-      -- commit;   -- TODO: *** REMOVE THE COMMIT ***
          rollback; -- Notice this routine starts an AUTONOMOUS TRANSACTION !
          dbms_lob.freetemporary( l_zip_content );        
-         restore_excel_session_params;
+         restore_session_params;
       end cleanup_this_routine;
 
       

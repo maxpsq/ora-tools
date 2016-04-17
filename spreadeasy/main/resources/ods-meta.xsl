@@ -13,7 +13,13 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:xlink="htt
           <dc:date><xsl:value-of select="substring-before(./LastSaved,'Z')"/></dc:date>
           <dc:creator><xsl:value-of select="./LastAuthor"/></dc:creator>
           <meta:generator><xsl:value-of select="./Generator"/></meta:generator>
+          <meta:editing-duration>PT1M1S</meta:editing-duration>
           <meta:editing-cycles><xsl:value-of select="./Version"/></meta:editing-cycles>
+          <meta:document-statistic>
+            <xsl:attribute name="meta:table-count"><xsl:value-of select="count(//ROWSET[position()>1])"/></xsl:attribute>
+            <xsl:attribute name="meta:cell-count"><xsl:value-of select="count(//ROWSET[position()>1]/ROW/*)"/></xsl:attribute>
+            <xsl:attribute name="meta:object-count"><xsl:value-of select="count(//object)"/></xsl:attribute> <!-- always 0 -->
+          </meta:document-statistic>
         </xsl:for-each>
       </office:meta>
     </office:document-meta>

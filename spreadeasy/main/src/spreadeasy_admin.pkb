@@ -100,6 +100,10 @@ package body spreadeasy_admin is
       l_bfile    bfile;
       l_clob     CLOB;
       l_fsize    INTEGER;
+      l_dest_offset    INTEGER := 1;
+      l_src_offset     INTEGER := 1;
+      l_lang_context   INTEGER := 0;
+      l_warn           INTEGER ;
 
       procedure clean_up is
       begin
@@ -115,7 +119,7 @@ package body spreadeasy_admin is
       DBMS_LOB.CREATETEMPORARY (l_clob, TRUE, DBMS_LOB.SESSION);
       l_fsize := DBMS_LOB.GETLENGTH(l_bfile);
       if ( l_fsize > 0 ) then
-        DBMS_LOB.LOADFROMFILE (l_clob, l_bfile, l_fsize);
+        DBMS_LOB.LOADCLOBFROMFILE (l_clob, l_bfile, l_fsize, l_dest_offset, l_src_offset, NLS_CHARSET_ID(charset_in), l_lang_context, l_warn);
       end if;
       merge into spreadeasy_builders d
          using ( select l_clob           as builder_doc
