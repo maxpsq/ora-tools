@@ -4,19 +4,19 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:xlink="htt
 
   <xsl:output method="xml" indent="yes" encoding="utf-8"/>
 
-  <xsl:template match="/SPREADSHEET/ROWSET[position()=1]/ROW">
+  <xsl:template match="/">
     <office:document-meta office:version="1.2">
       <office:meta>
-        <meta:initial-creator><xsl:value-of select="Author"/></meta:initial-creator>
-        <meta:creation-date><xsl:value-of select="substring-before(./Created,'Z')"/></meta:creation-date>
-        <dc:date><xsl:value-of select="substring-before(./LastSaved,'Z')"/></dc:date>
-        <dc:creator><xsl:value-of select="./LastAuthor"/></dc:creator>
-        <meta:generator><xsl:value-of select="./Generator"/></meta:generator>
-        <meta:editing-cycles><xsl:value-of select="./Version"/></meta:editing-cycles>
+        <xsl:for-each select="SPREADSHEET/ROWSET[position()=1]/ROW">
+          <meta:initial-creator><xsl:value-of select="Author"/></meta:initial-creator>
+          <meta:creation-date><xsl:value-of select="substring-before(./Created,'Z')"/></meta:creation-date>
+          <dc:date><xsl:value-of select="substring-before(./LastSaved,'Z')"/></dc:date>
+          <dc:creator><xsl:value-of select="./LastAuthor"/></dc:creator>
+          <meta:generator><xsl:value-of select="./Generator"/></meta:generator>
+          <meta:editing-cycles><xsl:value-of select="./Version"/></meta:editing-cycles>
+        </xsl:for-each>
       </office:meta>
     </office:document-meta>
   </xsl:template>
-
-  <xsl:template match="/*/*/*"></xsl:template>
 
 </xsl:stylesheet>

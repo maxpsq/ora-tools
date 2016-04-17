@@ -246,7 +246,6 @@ package body spreadeasy as
       l_col_cnt            PLS_INTEGER;
       l_desc_tab           dbms_sql.desc_tab2;
       l_zip_content        BLOB;
-      l_dummy_clob         CLOB;
       l_dummy_str          varchar2(32767);
       l_dummy_xml          XMLType;
       l_dummy_cur          SYS_REFCURSOR;
@@ -337,7 +336,7 @@ package body spreadeasy as
           when dbms_sql.urowid_type            then l_ret := 'UROWID';
           when dbms_sql.binary_bouble_type     then l_ret := 'BINARY BOUBLE';
           else
-            l_ret := '<UNHANDLED>';
+            l_ret := '#UNHANDLED#';
         end case;  
         return l_ret;
       end dbms_sql2ora_type;
@@ -345,7 +344,7 @@ package body spreadeasy as
 
       procedure cleanup_this_routine is
       begin
-         commit;   -- TODO: *** REMOVE THE COMMIT ***
+      -- commit;   -- TODO: *** REMOVE THE COMMIT ***
          rollback; -- Notice this routine starts an AUTONOMOUS TRANSACTION !
          dbms_lob.freetemporary( l_zip_content );        
          restore_excel_session_params;
@@ -415,38 +414,20 @@ package body spreadeasy as
                            where b.style_id = getStyle
                            order by b.step ) 
       loop
-      
          case builder_rec.builder_type
             when 'TXT' then
                as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(builder_rec.builder_doc));
             when 'XML' then
                as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(builder_rec.xml_doc.getCLOBVal()));
             when 'XSL' then
-               if l_dataset is null then
-                 null;
-               end if;
-               if builder_rec.xml_doc is null then
-                 null;
-               end if;
                select XMLtransform(l_dataset, builder_rec.xml_doc) as xml
                  into l_dummy_xml
                  from dual;
                if l_dummy_xml is null then
-                 null;
+                 raise_application_error(-20001, 'XSLT resulted in a NULL object for '||builder_rec.out_path||'. Check the XSL document.');
                end if;
---            l_dummy_xml := l_dataset.transform(builder_rec.xml_doc);
-            INSERT INTO spreadeasy_wrk
-            SELECT l_ss_id, builder_rec.step+100, l_dummy_xml
-              FROM dual;
-            commit;   
-               l_dummy_str := l_dummy_xml.getStringVal();
-               l_dummy_clob := l_dummy_xml.getCLOBVal();
-               as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(l_dummy_clob) );
-               if ( 1 = DBMS_LOB.isTemporary(l_dummy_clob) ) then
-                  DBMS_LOB.freeTemporary(l_dummy_clob);
-               end if;
+               as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(l_dummy_xml.getCLOBVal()) );
          end case;
-      
       end loop;
       
       as_zip.finish_zip( l_zip_content );

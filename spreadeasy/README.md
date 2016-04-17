@@ -1,4 +1,4 @@
-# SpreadEasy vers. 1.0-M2 (Milestone 2)
+# SpreadEasy vers. 1.0-M3 (Milestone 3)
 
 
 ## What SpreadEasy is
@@ -12,7 +12,7 @@ move to a specific cell and set its value nor to write formulas or such. Spreade
 
 
 ## How it works
-SpreadEasy relies on Oracle XML DB. The cursors provided are just used to generate XML documents via DBMS_XML package and then transformed to a spreadsheet via XSLT.
+SpreadEasy relies on Oracle XML DB. The cursors provided are just used to generate XML documents via DBMS_XML package and then transformed to spreadsheet components via XSLT. The files are then zipped to the spreasheet archive you choosed.
 
 
 ## How to use it
@@ -20,6 +20,8 @@ Here's an example on how to get a spreadsheet from a couple of queries run again
 
 ```
 declare
+  -- This is a ORACLE DIRECTORY you've been granted write permissions
+  l_ora_dir  varchar2(30) := 'SPREADEASY_RESOURCES';
   l_emp_cur         SYS_REFCURSOR;
   l_dpt_stmt        VARCHAR2(400);
   spreadsheet_xml   XMLtype;
@@ -40,15 +42,8 @@ begin
   spreadeasy.addWorkSheet(l_emp_cur, 'Employees'); 
   spreadeasy.addWorkSheet(l_dpt_stmt, 'Departments');
 
-  -- build the XML document
-  spreadeasy.build; 
-
-  -- Now get your spreadsheet either as an XMLType...
-  spreadsheet_xml := spreadeasy.getAsXMLType  
-  -- ... or as a CLOB
-  spreadsheet_clob := spreadeasy.getAsCLOB  
-
-  -- [just do what you want with your spreadsheet here (2)]
+  -- build the XML documents and save them as a ODS zipped archive.
+  spreadeasy.build(l_ora_dir, 'hr.ods'); 
   
   -- Finally, it's a good practice to clear all package
   -- variables after use...
@@ -79,7 +74,6 @@ Notice also your session settings are brought back to the
 original settings after the spreadsheet is built (after call
 to `build`).
 
-
 */
 ```
 
@@ -92,6 +86,8 @@ These are the privileges you need to be granted:
 - CREATE SEQUENCE
 - CREATE PROCEDURE
 - CREATE ANY DIRECTORY
+
+Before you install or upgrade to a newer version, notice Spreadeasy depends on the package `as_zip` (it's in this same repository). You're required to install `as_zip` in order to compile Spreadeasy on your Oracle dadatabe.
 
 Privided your user has been granted the aformentioned privileges, you can now connect to the Oracle database and follow the instructions whether you're installing SpreadEasy for the first time or you're migrating to a later version.
 
