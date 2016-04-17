@@ -9,7 +9,6 @@ begin
    spreadeasy.addWorksheet(l_stmt2);
    spreadeasy.addWorksheet(l_stmt1);
    spreadeasy.build(l_ora_dir, 'hr.ods');
---   spreadeasy_test_util.save_test('Employees and Departments table');
    spreadeasy.reset;
 exception
    when others then

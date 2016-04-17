@@ -62,9 +62,11 @@ package body spreadeasy_admin is
       charset_in       in varchar2
    ) is
       pragma autonomous_transaction;
+      l_xml   XMLType;
    begin 
+      l_xml := XMLType(bfilename(dir_in, fname_in), nls_charset_id(charset_in));
       merge into spreadeasy_builders d
-         using ( select XMLType(bfilename(dir_in, fname_in), nls_charset_id(charset_in)) as xml_doc
+         using ( select l_xml as xml_doc
                       , step_in          as step
                       , builder_type_in  as builder_type
                       , outpath_in       as out_path
@@ -97,6 +99,7 @@ package body spreadeasy_admin is
       
       l_bfile    bfile;
       l_clob     CLOB;
+      l_fsize    INTEGER;
 
       procedure clean_up is
       begin
@@ -110,7 +113,10 @@ package body spreadeasy_admin is
       l_bfile := bfilename(dir_in, fname_in);
       DBMS_LOB.OPEN (l_bfile);
       DBMS_LOB.CREATETEMPORARY (l_clob, TRUE, DBMS_LOB.SESSION);
-      DBMS_LOB.LOADFROMFILE (l_clob, l_bfile, DBMS_LOB.GETLENGTH(l_bfile));
+      l_fsize := DBMS_LOB.GETLENGTH(l_bfile);
+      if ( l_fsize > 0 ) then
+        DBMS_LOB.LOADFROMFILE (l_clob, l_bfile, l_fsize);
+      end if;
       merge into spreadeasy_builders d
          using ( select l_clob           as builder_doc
                       , step_in          as step
@@ -139,25 +145,27 @@ package body spreadeasy_admin is
   
    procedure load_ods_builders is
       l_style_id   spreadeasy_builders.style_id%type := spreadeasy.ODS;
+      C_CHARSET    CONSTANT varchar2(16) := 'AL32UTF8';
    begin
       set_style(l_style_id, 'Open Document Spreadsheet');
-      load_xml_builder(l_style_id, 1, 'XSL', 'content.xml', 
-                       ORA_DIRNAME, 'ods-content.xsl', 'AL32UTF8');
+      load_xml_builder(l_style_id, 1, 'XSL', 'meta.xml', 
+                       ORA_DIRNAME, 'ods-meta.xsl', C_CHARSET);
       load_txt_builder(l_style_id, 2, 'TXT', 'mimetype', 
-                       ORA_DIRNAME, 'ods-mimetype', 'AL32UTF8');
+                       ORA_DIRNAME, 'ods-mimetype', C_CHARSET);
       load_xml_builder(l_style_id, 3, 'XML', 'META-INF/manifest.xml', 
-                       ORA_DIRNAME, 'ods-manifest.xml', 'AL32UTF8');
+                       ORA_DIRNAME, 'ods-manifest.xml', C_CHARSET);
       load_xml_builder(l_style_id, 4, 'XML', 'manifest.rdf', 
-                       ORA_DIRNAME, 'ods-manifest.rdf', 'AL32UTF8');
-      load_xml_builder(l_style_id, 5, 'XSL', 'meta.xml', 
-                       ORA_DIRNAME, 'ods-meta.xsl', 'AL32UTF8');
+                       ORA_DIRNAME, 'ods-manifest.rdf', C_CHARSET);
+      load_xml_builder(l_style_id, 5, 'XSL', 'content.xml', 
+                       ORA_DIRNAME, 'ods-content.xsl', C_CHARSET);
       load_xml_builder(l_style_id, 6, 'XML', 'styles.xml', 
-                       ORA_DIRNAME, 'ods-styles.xml', 'AL32UTF8');
+                       ORA_DIRNAME, 'ods-styles.xml', C_CHARSET);
       load_xml_builder(l_style_id, 7, 'XSL', 'settings.xml', 
-                       ORA_DIRNAME, 'ods-settings.xsl', 'AL32UTF8');
-      -- Notice `current.xml` is an empty file. For this reasone, gives an error. 
---      load_txt_builder(l_style_id, 8, 'TXT', 'Configurations2/accelerator/current.xml', 
---                       ORA_DIRNAME, 'ods-current.xml', 'AL32UTF8');
+                       ORA_DIRNAME, 'ods-settings.xsl', C_CHARSET);
+      -- Notice `current.xml` is an empty file, that's why it's been classified
+      -- as TXT.
+      load_txt_builder(l_style_id, 8, 'TXT', 'Configurations2/accelerator/current.xml', 
+                       ORA_DIRNAME, 'ods-current.xml', C_CHARSET);
    end;
 
 

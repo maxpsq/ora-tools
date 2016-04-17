@@ -1,9 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:fn="http://www.w3.org/2005/xpath-functions"
   xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" 
   xmlns:xlink="http://www.w3.org/1999/xlink" 
   xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" 
   xmlns:ooo="http://openoffice.org/2004/office">
+
+  <xsl:output method="xml" indent="yes" encoding="utf-8"/>
 
   <xsl:template match="/">
     <office:document-settings office:version="1.2">
@@ -85,7 +87,7 @@
 
 
   <xsl:template match="/*/*[position() > 1]">
-    <config:config-item-map-entry><xsl:attribute name="config:name"/><xsl:value-of select="@worksheet_name"/>
+    <config:config-item-map-entry><xsl:attribute name="config:name"><xsl:value-of select="@worksheet_name"/></xsl:attribute>
       <config:config-item config:name="CursorPositionX" config:type="int">0</config:config-item>
       <config:config-item config:name="CursorPositionY" config:type="int">0</config:config-item>
       <config:config-item config:name="HorizontalSplitMode" config:type="short">0</config:config-item>

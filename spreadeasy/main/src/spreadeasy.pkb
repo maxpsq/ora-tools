@@ -18,6 +18,7 @@ package body spreadeasy as
 */
 
    C_SCHEMA_OWNER    CONSTANT  varchar2(30) := sys_context('userenv','current_schema');
+   C_XML_VERSION     CONSTANT  varchar2(3) := '1.0';
 
    subtype datetime_fmt_t is VARCHAR2(30);
 
@@ -30,7 +31,7 @@ package body spreadeasy as
 
    g_worksheets_nt        worksheets_nt_t not null := worksheets_nt_t();
    g_active_worksheet     worksheet_idx_t;   
-   g_spreadsheet          XMLType;
+--   g_spreadsheet          XMLType;
    g_doc_props_rec        doc_props_rt;
    
    type session_vars_aat  is table of varchar2(512) index by varchar2(30);
@@ -142,7 +143,7 @@ package body spreadeasy as
    begin
       g_worksheets_nt := worksheets_nt_t();
       g_active_worksheet := null;
-      g_spreadsheet := null;
+--      g_spreadsheet := null;
       g_doc_props_rec := null;
    end;
    
@@ -180,21 +181,7 @@ package body spreadeasy as
    begin
       newWorkbook(ODS, author_in, company_in);
    end;
-/*
-    -- TODO GET_BUILDER
-   function get_xml_builder(
-      style_in  in  style_t, 
-      step_in   in  SPREADEASY_BUILDERS.step%type
-   ) return XMLType 
-   is
-      l_style    style_t NOT NULL := style_in;
-      l_step     SPREADEASY_BUILDERS.step%type NOT NULL := step_in;
-      l_dburi    varchar2(512);
-   begin
-      l_dburi := '/'||C_SCHEMA_OWNER||'/SPREADEASY_BUILDERS/ROW[STYLE_ID="'||l_style||'" AND STEP="'||l_step||'"]/DOCUMENT/text()';
-      return DBURIType(l_dburi).getXML(l_dburi);
-   end;
-*/
+
 
    procedure format(style_in  in  style_t) is
    begin
@@ -242,26 +229,6 @@ package body spreadeasy as
       return g_ss_style;
    end;
    
-   
-   procedure addToZip(
-      zip_blob_io   IN OUT NOCOPY BLOB, 
-      data_clob_in  IN            CLOB,
-      path_in       spreadeasy_builders.out_path%type
-   ) is
-     l_data_blob   BLOB;
-     l_dest_offset INTEGER := 1;
-     l_src_offset  INTEGER := 1;
-     l_ctxt        INTEGER;
-     l_warn        INTEGER;
-     l_csid        NUMBER := nls_charset_id('UTF8');
-   begin
-      DBMS_LOB.convertToBlob(
-            l_data_blob, data_clob_in, 
-            DBMS_LOB.getlength(data_clob_in), l_dest_offset, l_src_offset, 
-            l_csid, l_ctxt, l_warn);
-      as_zip.add1file( zip_blob_io, path_in, l_data_blob );
-   end;
-   
 
    procedure build(dir_in  varchar2, filename_in varchar2) 
    is
@@ -269,19 +236,21 @@ package body spreadeasy as
       EXCEL_PROP_DATETIME_FMT  CONSTANT datetime_fmt_t := 'YYYY-MM-DD"T"HH24:MI:SS"Z"';
    
       l_spreadsheet_xslt   XMLType;
-      l_dummy_xml          XMLType;
       l_dataset            XMLType;
       l_ws_rec             worksheet_rec_t;
       l_ws_idx             worksheet_idx_t;  
       l_ss_id              spreadeasy_wrk.spreadsheet_id%type;
-      l_dummy_cur          SYS_REFCURSOR;
       l_xmlctx             DBMS_XMLGEN.ctxHandle;
       
       l_colname            column_datatypes_aa_idx_t;
-      l_dummy_coldt        column_datatypes_aat ;
       l_col_cnt            PLS_INTEGER;
       l_desc_tab           dbms_sql.desc_tab2;
       l_zip_content        BLOB;
+      l_dummy_clob         CLOB;
+      l_dummy_str          varchar2(32767);
+      l_dummy_xml          XMLType;
+      l_dummy_cur          SYS_REFCURSOR;
+      l_dummy_coldt        column_datatypes_aat ;
       
       PRAGMA AUTONOMOUS_TRANSACTION;
       
@@ -385,6 +354,11 @@ package body spreadeasy as
       
    begin
       g_start_time := systimestamp ;
+
+-- =============================================================================
+-- First phase: building the XML dataset from the cursors
+-- =============================================================================
+
       if ( g_worksheets_nt.COUNT = 0 ) then
          return;
       end if;
@@ -427,12 +401,15 @@ package body spreadeasy as
       end loop;
 
 
-      select XMLRoot(XMLELEMENT("SPREADSHEET", XMLAGG(document)), VERSION '1.0') as xml
+      select XMLRoot(XMLELEMENT("SPREADSHEET", XMLAGG(document)), VERSION C_XML_VERSION) as xml
         into l_dataset
         from spreadeasy_wrk
        where spreadsheet_id = l_ss_id
        order by worksheet_id;
-       
+
+-- =============================================================================
+-- Second phase: building the Spreadsheet starting from the XML dataset
+-- =============================================================================
       for builder_rec in (select * 
                             from spreadeasy_builders b 
                            where b.style_id = getStyle
@@ -441,17 +418,34 @@ package body spreadeasy as
       
          case builder_rec.builder_type
             when 'TXT' then
-               addToZip(l_zip_content, builder_rec.builder_doc, builder_rec.out_path);
+               as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(builder_rec.builder_doc));
             when 'XML' then
-               addToZip(l_zip_content, builder_rec.xml_doc.getCLOBVal(), builder_rec.out_path);
+               as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(builder_rec.xml_doc.getCLOBVal()));
             when 'XSL' then
-               select XMLRoot(XMLtransform(l_dataset, builder_rec.xml_doc), VERSION '1.0') as xml
+               if l_dataset is null then
+                 null;
+               end if;
+               if builder_rec.xml_doc is null then
+                 null;
+               end if;
+               select XMLtransform(l_dataset, builder_rec.xml_doc) as xml
                  into l_dummy_xml
                  from dual;
--- TODO:FIX: the first call to `addToZip` raises an eror                 
-               addToZip(l_zip_content, l_dummy_xml.getCLOBVal(), builder_rec.out_path);
+               if l_dummy_xml is null then
+                 null;
+               end if;
+--            l_dummy_xml := l_dataset.transform(builder_rec.xml_doc);
+            INSERT INTO spreadeasy_wrk
+            SELECT l_ss_id, builder_rec.step+100, l_dummy_xml
+              FROM dual;
+            commit;   
+               l_dummy_str := l_dummy_xml.getStringVal();
+               l_dummy_clob := l_dummy_xml.getCLOBVal();
+               as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(l_dummy_clob) );
+               if ( 1 = DBMS_LOB.isTemporary(l_dummy_clob) ) then
+                  DBMS_LOB.freeTemporary(l_dummy_clob);
+               end if;
          end case;
-
       
       end loop;
       
@@ -465,18 +459,6 @@ package body spreadeasy as
          raise;
    end;
 
-
-   function getAsXMLType return XMLType is
-   begin
-      return g_spreadsheet;
-   end;
-   
-   
-   function getAsCLOB return CLOB is
-   begin
-      return g_spreadsheet.getCLOBVal();
-   end;
-   
    
    function getStartTime return timestamp is
    begin

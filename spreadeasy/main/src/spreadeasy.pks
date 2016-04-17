@@ -70,7 +70,7 @@ package spreadeasy as
    );
    
 
-   /** Return the spreadsheet style previously set (1=Excel) */
+   /** Return the spreadsheet style previously set */
    function getStyle return style_t;
 
 
@@ -91,14 +91,6 @@ package spreadeasy as
    /** Build the spreadsheet using the cursors passed to each worksheet
        and save it to disk at the given location */
    procedure build(dir_in  varchar2, filename_in varchar2); 
-   
-   
-   /** Get the generated spreadsheet as a XMLType variable */
-   function getAsXMLType return XMLType;
-   
-   
-   /** Get the generated spreadsheet as a CLOB variable */
-   function getAsCLOB return CLOB;
    
    
    /** Get the date and time of the last call to `build` routine */
