@@ -43,8 +43,10 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
   </office:document-content>
   </xsl:template>
 
+
   <xsl:template match="/*/*[position() = 1]">
   </xsl:template>
+
 
   <xsl:template match="/*/*[position() > 1]">
     <table:table table:style-name="ta1" table:print="false">
@@ -61,6 +63,7 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
     </table:table>
   </xsl:template>
 
+
   <xsl:template match="/*/*/*">
     <table:table-row table:style-name="ro1">
       <xsl:apply-templates/>
@@ -75,6 +78,7 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
     </table:table-cell>
   </xsl:template>
 
+
   <xsl:template match="/*/*[position() > 1]/*/*[@oratype='TIMESTAMP' or @oratype='TIMESTAMP WITH TIME ZONE' or @oratype='TIMESTAMP WITH LOCAL TIMEZONE']">
     <table:table-cell table:style-name="ce1" office:value-type="date">
       <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(.,'.000')"/></xsl:attribute>  
@@ -82,17 +86,20 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
     </table:table-cell>
   </xsl:template>
 
-  <xsl:template match="/*/*[position() > 1]/*/*[@oratype='NUMBER']">
+
+  <xsl:template match="/*/*[position() > 1]/*/*[@sstype='Numeric']">
     <table:table-cell table:style-name="ce1" office:value-type="float">
       <xsl:attribute name="office:value"><xsl:value-of select="."/></xsl:attribute>
       <text:p><xsl:value-of select="."/></text:p>
     </table:table-cell>
   </xsl:template>
 
-  <xsl:template match="/*/*[position() > 1]/*/*[@oratype='VARCHAR2' or @oratype='CHAR']">
+
+  <xsl:template match="/*/*[position() > 1]/*/*[@sstype='String']">
     <table:table-cell office:value-type="string">
       <text:p><xsl:value-of select="."/></text:p>
     </table:table-cell>
   </xsl:template>
+
 
 </xsl:stylesheet>

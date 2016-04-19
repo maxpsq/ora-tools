@@ -117,7 +117,20 @@ package body spreadeasy_admin is
       l_bfile := bfilename(dir_in, fname_in);
       DBMS_LOB.OPEN (l_bfile);
       DBMS_LOB.CREATETEMPORARY (l_clob, TRUE, DBMS_LOB.SESSION);
-      l_fsize := DBMS_LOB.GETLENGTH(l_bfile);
+      
+      /* Despite the ods-mimetype file for ODS archives is correctly encoded, I 
+       * need to set the file size to the actual length minus 1 in order to avoid
+       * an additional byte corrsponding to a LINE FEED (LF) (U+000A) to be 
+       * appended the the CLOB.
+       * This additional byte prevents OpenOffice.org to recognize the ods archive
+       * as Open Document compliant and causes the REPAIR routine to start in 
+       * order to fix the archive.
+       * I suppose this approach is not the best option, but it prevents the 
+       * annoying pop-up windows to alert the user about a unrecognized file 
+       * format.
+       */
+      l_fsize := DBMS_LOB.GETLENGTH(l_bfile) -1;
+      
       if ( l_fsize > 0 ) then
         DBMS_LOB.LOADCLOBFROMFILE (l_clob, l_bfile, l_fsize, l_dest_offset, l_src_offset, NLS_CHARSET_ID(charset_in), l_lang_context, l_warn);
       end if;
@@ -151,7 +164,7 @@ package body spreadeasy_admin is
       l_style_id   spreadeasy_builders.style_id%type := spreadeasy.ODS;
       C_CHARSET    CONSTANT varchar2(16) := 'AL32UTF8';
    begin
-      set_style(l_style_id, 'Open Document Spreadsheet');
+      set_style(l_style_id, 'Open Document Spreadsheet 1.2');
       load_xml_builder(l_style_id, 1, 'XSL', 'meta.xml', 
                        ORA_DIRNAME, 'ods-meta.xsl', C_CHARSET);
       load_txt_builder(l_style_id, 2, 'TXT', 'mimetype', 
@@ -166,7 +179,7 @@ package body spreadeasy_admin is
                        ORA_DIRNAME, 'ods-styles.xml', C_CHARSET);
       load_xml_builder(l_style_id, 7, 'XSL', 'settings.xml', 
                        ORA_DIRNAME, 'ods-settings.xsl', C_CHARSET);
-      -- Notice `current.xml` is an empty file, that's why it's been classified
+      -- Notice `current.xml` is an empty file, therefore it's been classified
       -- as TXT.
       load_txt_builder(l_style_id, 8, 'TXT', 'Configurations2/accelerator/current.xml', 
                        ORA_DIRNAME, 'ods-current.xml', C_CHARSET);

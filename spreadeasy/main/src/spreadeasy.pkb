@@ -31,7 +31,6 @@ package body spreadeasy as
 
    g_worksheets_nt        worksheets_nt_t not null := worksheets_nt_t();
    g_active_worksheet     worksheet_idx_t;   
---   g_spreadsheet          XMLType;
    g_doc_props_rec        doc_props_rt;
    
    type session_vars_aat  is table of varchar2(512) index by varchar2(30);
@@ -143,7 +142,6 @@ package body spreadeasy as
    begin
       g_worksheets_nt := worksheets_nt_t();
       g_active_worksheet := null;
---      g_spreadsheet := null;
       g_doc_props_rec := null;
    end;
    
@@ -244,7 +242,7 @@ package body spreadeasy as
 
    procedure build(dir_in  varchar2, filename_in varchar2) 
    is
-   
+      -- For ODS documents the trailing "Z" will be removed by the XSL
       EXCEL_PROP_DATETIME_FMT  CONSTANT datetime_fmt_t := 'YYYY-MM-DD"T"HH24:MI:SS"Z"';
    
       l_spreadsheet_xslt   XMLType;
@@ -261,24 +259,27 @@ package body spreadeasy as
       l_dummy_str          varchar2(32767);
       l_dummy_xml          XMLType;
       l_dummy_cur          SYS_REFCURSOR;
-      l_dummy_coldt        column_datatypes_aat ;
+      l_dummy_col_oradt    column_datatypes_aat ; -- Oracle data types
+      l_dummy_col_ssdt     column_datatypes_aat ; -- Spreadsheet data types
+--      l_dummy_col_fmval    column_datatypes_aat ; -- Formatted values
       
       PRAGMA AUTONOMOUS_TRANSACTION;
       
-      function datatype_injection(
+      function fields_info_injection(
         worksheet_rec_in       in worksheet_rec_t
-      , column_datatypes_aa_in in column_datatypes_aat
+      , column_ora_datatypes_aa_in in column_datatypes_aat
+      , column_ss_datatypes_aa_in  in column_datatypes_aat
       ) return XMLType 
       is
          l_ret   XMLType;
          l_buf   CLOB;
          
-         function xslt_template(column_name_in in varchar2, type_in in varchar2) return CLOB
+         function xslt_template(column_name_in in varchar2, oratype_in in varchar2, sstype_in varchar2) return CLOB
          is
             l_buf   CLOB;
          begin
             l_buf := to_clob('<xsl:template match="'||xml_safe_tag_name(column_name_in)||'">');
-            dbms_lob.append(l_buf, to_clob('<xsl:copy><xsl:attribute name="oratype">'||type_in||'</xsl:attribute>'));
+            dbms_lob.append(l_buf, to_clob('<xsl:copy><xsl:attribute name="oratype">'||oratype_in||'</xsl:attribute><xsl:attribute name="sstype">'||sstype_in||'</xsl:attribute>'));
             dbms_lob.append(l_buf, to_clob('<xsl:attribute name="column_heading">'||htf.escape_sc(column_name_in)||'</xsl:attribute>'));
             dbms_lob.append(l_buf, to_clob('<xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
             return l_buf;
@@ -290,17 +291,17 @@ package body spreadeasy as
          dbms_lob.append(l_buf, to_clob('<xsl:output method="xml" indent="yes" encoding="utf-8"/>'));
          dbms_lob.append(l_buf, to_clob('<xsl:template match="/*"><xsl:copy><xsl:attribute name="worksheet_name">'||htf.escape_sc(worksheet_rec_in.name)||'</xsl:attribute><xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
          dbms_lob.append(l_buf, to_clob('<xsl:template match="ROW"><xsl:copy><xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
-         l_colname := column_datatypes_aa_in.FIRST;
+         l_colname := column_ora_datatypes_aa_in.FIRST;
          loop 
             exit when l_colname is null;
-            dbms_lob.append(l_buf, xslt_template(l_colname, column_datatypes_aa_in(l_colname))); 
-            l_colname := column_datatypes_aa_in.NEXT(l_colname);
+            dbms_lob.append(l_buf, xslt_template(l_colname, column_ora_datatypes_aa_in(l_colname), column_ss_datatypes_aa_in(l_colname) )); 
+            l_colname := column_ora_datatypes_aa_in.NEXT(l_colname);
          end loop;
          dbms_lob.append(l_buf, to_clob('</xsl:stylesheet>'));
 
          select xmltype(l_buf) into l_ret from dual;
          return l_ret;
-      end datatype_injection;
+      end fields_info_injection;
 
 
       procedure gen_xml_fragment(
@@ -355,6 +356,24 @@ package body spreadeasy as
       end dbms_sql2ora_type;
       
 
+      function dbms_sql2spreadsheet_type(oradt_in in binary_integer) return varchar2 is
+        l_ret   varchar2(50);
+      begin
+        case oradt_in
+          when dbms_sql.number_type            then l_ret := 'Numeric';
+          when dbms_sql.binary_float_type      then l_ret := 'Numeric';
+          when dbms_sql.binary_double_type     then l_ret := 'Numeric';
+          when dbms_sql.date_type              then l_ret := 'DateTime';
+          when dbms_sql.Timestamp_Type         then l_ret := 'DateTime';
+          when dbms_sql.Timestamp_With_TZ_Type then l_ret := 'DateTime';
+          when dbms_sql.Timestamp_With_Local_TZ_Type then l_ret := 'DateTime';
+          else
+            l_ret := 'String';
+        end case;  
+        return l_ret;
+      end dbms_sql2spreadsheet_type;
+      
+      
       procedure cleanup_this_routine is
       begin
          rollback; -- Notice this routine starts an AUTONOMOUS TRANSACTION !
@@ -398,9 +417,11 @@ package body spreadeasy as
          
          dbms_sql.describe_columns2(c => l_ws_rec.refcur, col_cnt => l_col_cnt, desc_t => l_desc_tab);   
          for i in 1 .. l_col_cnt loop
-            l_dummy_coldt(l_desc_tab(i).col_name) := dbms_sql2ora_type(l_desc_tab(i).col_type);
+            l_dummy_col_oradt(l_desc_tab(i).col_name) := dbms_sql2ora_type(l_desc_tab(i).col_type);
+            l_dummy_col_ssdt (l_desc_tab(i).col_name) := dbms_sql2spreadsheet_type(l_desc_tab(i).col_type);
+--            l_dummy_col_fmval(l_desc_tab(i).col_name) := dbms_sql2formatted_values(l_desc_tab(i).col_type);
          end loop;
-         l_dummy_xml := datatype_injection(l_ws_rec, l_dummy_coldt);
+         l_dummy_xml := fields_info_injection(l_ws_rec, l_dummy_col_oradt, l_dummy_col_ssdt);
                
          l_dummy_cur := dbms_sql.to_refcursor(l_ws_rec.refcur);
          l_xmlctx := DBMS_XMLGEN.newContext(l_dummy_cur);
