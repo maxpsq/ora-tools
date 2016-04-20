@@ -17,7 +17,9 @@ package spreadeasy as
 
 */
 
-   C_GENERATOR   constant varchar2(64) := 'Spreadeasy v1.0-M3';
+   C_GENERATOR         constant varchar2(64) := 'Spreadeasy v1.0-M3';
+   
+   C_BUILDERS_CHARSET  constant varchar2(16) := 'AL32UTF8';
 
    TYPE doc_props_rt is record(
       author      varchar2(128),

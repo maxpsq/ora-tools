@@ -18,8 +18,6 @@ end;
 /
 
 
-select * from SPREADEASY_TEST_RESULTS order by test_no desc;
-
 
 begin
   spreadeasy_admin.set_resource_dir('/home/oracle/Desktop/spreadeasy-resources');

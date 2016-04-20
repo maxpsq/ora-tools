@@ -258,6 +258,7 @@ package body spreadeasy as
       l_zip_content        BLOB;
       l_dummy_str          varchar2(32767);
       l_dummy_xml          XMLType;
+      l_dummy_blob         BLOB;
       l_dummy_cur          SYS_REFCURSOR;
       l_dummy_col_oradt    column_datatypes_aat ; -- Oracle data types
       l_dummy_col_ssdt     column_datatypes_aat ; -- Spreadsheet data types
@@ -381,6 +382,29 @@ package body spreadeasy as
          restore_session_params;
       end cleanup_this_routine;
 
+
+      function clob2blob(clob_in  IN  CLOB CHARACTER SET ANY_CS) return BLOB is
+         the_blob         BLOB;
+         l_dest_offset    INTEGER := 1;
+         l_src_offset     INTEGER := 1;
+         l_lang_ctxt      INTEGER := 0;
+         l_warn           INTEGER ;
+      begin
+         DBMS_LOB.CREATETEMPORARY(the_blob, TRUE);
+         if DBMS_LOB.GETLENGTH(clob_in) > 0 then
+           DBMS_LOB.CONVERTTOBLOB(
+              the_blob,
+              clob_in,
+              DBMS_LOB.getLength(clob_in),
+              l_dest_offset,
+              l_src_offset, 
+              NLS_CHARSET_ID(C_BUILDERS_CHARSET),
+              l_lang_ctxt,
+              l_warn
+           );
+         end if;
+         RETURN the_blob;
+      end;
       
    begin
       g_start_time := systimestamp ;
@@ -449,17 +473,20 @@ package body spreadeasy as
       loop
          case builder_rec.builder_type
             when 'TXT' then
-               as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(builder_rec.builder_doc));
+               as_zip.add1file( l_zip_content, builder_rec.out_path, clob2blob(builder_rec.builder_doc));
             when 'XML' then
-               as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(builder_rec.xml_doc.getCLOBVal()));
-            when 'XSL' then
-               select XMLtransform(l_dataset, builder_rec.xml_doc) as xml
-                 into l_dummy_xml
+               select xmlserialize(document builder_rec.xml_doc  as blob no indent) as aBlob
+                 into l_dummy_blob
                  from dual;
-               if l_dummy_xml is null then
-                 raise_application_error(-20001, 'XSLT resulted in a NULL object for '||builder_rec.out_path||'. Check the XSL document.');
+               as_zip.add1file( l_zip_content, builder_rec.out_path, l_dummy_blob);
+            when 'XSL' then
+               select xmlserialize(document XMLtransform(l_dataset, builder_rec.xml_doc)  as blob no indent) as aBlob
+                 into l_dummy_blob
+                 from dual;
+               if l_dummy_blob is null then
+                 raise_application_error(-20001, 'XSLT gave a NULL object for '||builder_rec.out_path||'. Check the XSL document.');
                end if;
-               as_zip.add1file( l_zip_content, builder_rec.out_path, utl_raw.cast_to_raw(l_dummy_xml.getCLOBVal()) );
+               as_zip.add1file( l_zip_content, builder_rec.out_path, l_dummy_blob );
          end case;
       end loop;
       

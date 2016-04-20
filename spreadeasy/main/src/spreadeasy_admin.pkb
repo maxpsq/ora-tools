@@ -118,20 +118,20 @@ package body spreadeasy_admin is
       DBMS_LOB.OPEN (l_bfile);
       DBMS_LOB.CREATETEMPORARY (l_clob, TRUE, DBMS_LOB.SESSION);
       
-      /* Despite the ods-mimetype file for ODS archives is correctly encoded, I 
-       * need to set the file size to the actual length minus 1 in order to avoid
-       * an additional byte corrsponding to a LINE FEED (LF) (U+000A) to be 
-       * appended the the CLOB.
-       * This additional byte prevents OpenOffice.org to recognize the ods archive
-       * as Open Document compliant and causes the REPAIR routine to start in 
-       * order to fix the archive.
-       * I suppose this approach is not the best option, but it prevents the 
-       * annoying pop-up windows to alert the user about a unrecognized file 
-       * format.
-       */
-      l_fsize := DBMS_LOB.GETLENGTH(l_bfile) -1;
-      
+      l_fsize := DBMS_LOB.GETLENGTH(l_bfile);
       if ( l_fsize > 0 ) then
+        /* Despite the ods-mimetype file for ODS archives is correctly encoded, I 
+         * need to set the file size to the actual length minus 1 in order to avoid
+         * an additional byte corrsponding to a LINE FEED (LF) (U+000A) to be 
+         * appended the the CLOB.
+         * This additional byte prevents OpenOffice.org to recognize the ods archive
+         * as Open Document compliant and causes the REPAIR routine to start in 
+         * order to fix the archive.
+         * I suppose this approach is not the best option, but it prevents the 
+         * annoying pop-up windows to alert the user about a unrecognized file 
+         * format.
+         */      
+        l_fsize := l_fsize -1 ;
         DBMS_LOB.LOADCLOBFROMFILE (l_clob, l_bfile, l_fsize, l_dest_offset, l_src_offset, NLS_CHARSET_ID(charset_in), l_lang_context, l_warn);
       end if;
       merge into spreadeasy_builders d
@@ -162,27 +162,27 @@ package body spreadeasy_admin is
   
    procedure load_ods_builders is
       l_style_id   spreadeasy_builders.style_id%type := spreadeasy.ODS;
-      C_CHARSET    CONSTANT varchar2(16) := 'AL32UTF8';
+      l_charset    varchar2(16) := SPREADEASY.C_BUILDERS_CHARSET ;
    begin
       set_style(l_style_id, 'Open Document Spreadsheet 1.2');
       load_xml_builder(l_style_id, 1, 'XSL', 'meta.xml', 
-                       ORA_DIRNAME, 'ods-meta.xsl', C_CHARSET);
+                       ORA_DIRNAME, 'ods-meta.xsl', l_charset);
       load_txt_builder(l_style_id, 2, 'TXT', 'mimetype', 
-                       ORA_DIRNAME, 'ods-mimetype', C_CHARSET);
+                       ORA_DIRNAME, 'ods-mimetype', l_charset);
       load_xml_builder(l_style_id, 3, 'XML', 'META-INF/manifest.xml', 
-                       ORA_DIRNAME, 'ods-manifest.xml', C_CHARSET);
+                       ORA_DIRNAME, 'ods-manifest.xml', l_charset);
       load_xml_builder(l_style_id, 4, 'XML', 'manifest.rdf', 
-                       ORA_DIRNAME, 'ods-manifest.rdf', C_CHARSET);
+                       ORA_DIRNAME, 'ods-manifest.rdf', l_charset);
       load_xml_builder(l_style_id, 5, 'XSL', 'content.xml', 
-                       ORA_DIRNAME, 'ods-content.xsl', C_CHARSET);
+                       ORA_DIRNAME, 'ods-content.xsl', l_charset);
       load_xml_builder(l_style_id, 6, 'XML', 'styles.xml', 
-                       ORA_DIRNAME, 'ods-styles.xml', C_CHARSET);
+                       ORA_DIRNAME, 'ods-styles.xml', l_charset);
       load_xml_builder(l_style_id, 7, 'XSL', 'settings.xml', 
-                       ORA_DIRNAME, 'ods-settings.xsl', C_CHARSET);
+                       ORA_DIRNAME, 'ods-settings.xsl', l_charset);
       -- Notice `current.xml` is an empty file, therefore it's been classified
       -- as TXT.
       load_txt_builder(l_style_id, 8, 'TXT', 'Configurations2/accelerator/current.xml', 
-                       ORA_DIRNAME, 'ods-current.xml', C_CHARSET);
+                       ORA_DIRNAME, 'ods-current.xml', l_charset);
    end;
 
 
