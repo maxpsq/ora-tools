@@ -20,10 +20,10 @@ package spreadeasy_admin is
    procedure set_resource_dir(path_in in varchar2);
    
    
-   procedure load_ods_builders;
+   procedure load_ods_builders(charset_in  in varchar2);
    
 
-   procedure load_all_builders;
+   procedure load_all_builders(charset_in  in varchar2);
    
 
 end;

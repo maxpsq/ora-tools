@@ -23,24 +23,38 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
           <style:table-properties table:display="true" style:writing-mode="lr-tb" />
         </style:style>
         <number:date-style style:name="N37" number:automatic-order="true">
-        <number:day number:style="long" />
-        <number:text>/</number:text>
-        <number:month number:style="long" />
-        <number:text>/</number:text>
-        <number:year />
-      </number:date-style>
-      <number:number-style style:name="N8000" number:language="it" number:country="IT">
-        <number:number number:min-integer-digits="1" />
-      </number:number-style>
-      <style:style style:name="ce1" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N8000" />
-      <style:style style:name="ce2" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N37" />
-    </office:automatic-styles>
-    <office:body>
-      <office:spreadsheet>
-        <xsl:apply-templates/>
-      </office:spreadsheet>
-    </office:body>
-  </office:document-content>
+          <number:day number:style="long" />
+          <number:text>/</number:text>
+          <number:month number:style="long" />
+          <number:text>/</number:text>
+          <number:year number:style="long" />
+        </number:date-style>
+        <number:date-style style:name="N38" number:automatic-order="true">
+          <number:day number:style="long" />
+          <number:text>/</number:text>
+          <number:month number:style="long" />
+          <number:text>/</number:text>
+          <number:year number:style="long"/>
+          <number:text> </number:text>
+          <number:hours number:style="long"/>
+          <number:text>.</number:text>
+          <number:minutes number:style="long"/>
+          <number:text>.</number:text>
+          <number:seconds number:style="long"/>
+        </number:date-style>
+        <number:number-style style:name="N8000" number:language="it" number:country="IT">
+          <number:number number:min-integer-digits="1" />
+        </number:number-style>
+        <style:style style:name="ce1" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N8000" />
+        <style:style style:name="ce2" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N37" />
+        <style:style style:name="ce3" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N38" />
+      </office:automatic-styles>
+      <office:body>
+        <office:spreadsheet>
+          <xsl:apply-templates/>
+        </office:spreadsheet>
+      </office:body>
+    </office:document-content>
   </xsl:template>
 
 
@@ -71,26 +85,44 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
   </xsl:template>
 
 
-  <xsl:template match="/*/*[position() > 1]/*/*[@oratype='DATE']">
-    <table:table-cell table:style-name="ce1" office:value-type="date">
-      <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(substring-before(.,'.000'),'T00:00:00')"/></xsl:attribute>
-      <text:p><xsl:value-of select="substring-before(.,'T')"/></text:p>
+  <xsl:template match="/*/*[position() > 1]/*/*[@oratype='DATE' and contains(text(),'T00:00:00.000')]">
+    <table:table-cell table:style-name="ce2" office:value-type="date">
+      <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(.,'T00:00:00.000')"/></xsl:attribute>
+      <text:p><xsl:value-of select="translate(substring-before(.,'T00:00:00.000'), 'T', ' ')"/></text:p>
     </table:table-cell>
   </xsl:template>
 
 
-  <xsl:template match="/*/*[position() > 1]/*/*[@oratype='TIMESTAMP' or @oratype='TIMESTAMP WITH TIME ZONE' or @oratype='TIMESTAMP WITH LOCAL TIMEZONE']">
-    <table:table-cell table:style-name="ce1" office:value-type="date">
-      <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(.,'.000')"/></xsl:attribute>  
+  <xsl:template match="/*/*[position() > 1]/*/*[@oratype='DATE' and not(contains(text(),'T00:00:00.000'))]">
+    <table:table-cell table:style-name="ce3" office:value-type="date">
+      <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(.,'.000')"/></xsl:attribute>
       <text:p><xsl:value-of select="translate(substring-before(.,'.000'), 'T', ' ')"/></text:p>
     </table:table-cell>
   </xsl:template>
 
 
-  <xsl:template match="/*/*[position() > 1]/*/*[@sstype='Numeric']">
-    <table:table-cell table:style-name="ce1" office:value-type="float">
+  <xsl:template match="/*/*[position() > 1]/*/*[@oratype='TIMESTAMP' or @oratype='TIMESTAMP WITH TIME ZONE' or @oratype='TIMESTAMP WITH LOCAL TIMEZONE']">
+    <table:table-cell table:style-name="ce3" office:value-type="date">
+      <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(.,'.000')"/></xsl:attribute>  
+      <text:p><xsl:value-of select="translate(substring-before(.,'.000'), 'T', ' ')"/></text:p>
+    </table:table-cell>
+  </xsl:template>
+
+  <!-- ODS supports up to 11 decimal positions, then no particular actions on numbers within this precision -->
+  <!-- Notice "<=" was replaced with "&lt;=" in order to avoid errors while parsing this document -->
+  <xsl:template match="/*/*[position() > 1]/*/*[@sstype='Numeric' and string-length(substring-after(., '.')) &lt;= 11]">
+    <table:table-cell office:value-type="float">
       <xsl:attribute name="office:value"><xsl:value-of select="."/></xsl:attribute>
       <text:p><xsl:value-of select="."/></text:p>
+    </table:table-cell>
+  </xsl:template>
+
+  <!-- ODS supports up to 11 decimal positions, then we need to round the numbers over this precision -->
+  <!-- Notice ">" was replaced with "&gt;" in order to avoid errors while parsing this document -->
+  <xsl:template match="/*/*[position() > 1]/*/*[@sstype='Numeric' and string-length(substring-after(., '.')) &gt; 11]">
+    <table:table-cell office:value-type="float">
+      <xsl:attribute name="office:value"><xsl:value-of select="format-number(.,'#.###########')"/></xsl:attribute>
+      <text:p><xsl:value-of select="format-number(.,'#.###########')"/></text:p>
     </table:table-cell>
   </xsl:template>
 

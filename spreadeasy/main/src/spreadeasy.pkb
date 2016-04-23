@@ -25,12 +25,13 @@ package body spreadeasy as
    SUBTYPE oracle_obj_name_t  is varchar2(30);
    
    SUBTYPE column_datatypes_aa_idx_t is VARCHAR2(32767);
-   TYPE column_datatypes_aat is table oF VARCHAR2(32) INDEX BY column_datatypes_aa_idx_t;
+   TYPE column_datatypes_aat  is table of VARCHAR2(32) INDEX BY column_datatypes_aa_idx_t;
+   TYPE column_precisions_aat is table of PLS_INTEGER  INDEX BY column_datatypes_aa_idx_t;
+   TYPE column_scales_aat     is table of PLS_INTEGER  INDEX BY column_datatypes_aa_idx_t;
    
-   g_ss_style             style_t NOT NULL := Excel;
+   g_ss_style             style_t NOT NULL := ODS;
 
    g_worksheets_nt        worksheets_nt_t not null := worksheets_nt_t();
-   g_active_worksheet     worksheet_idx_t;   
    g_doc_props_rec        doc_props_rt;
    
    type session_vars_aat  is table of varchar2(512) index by varchar2(30);
@@ -141,7 +142,6 @@ package body spreadeasy as
    procedure reset is
    begin
       g_worksheets_nt := worksheets_nt_t();
-      g_active_worksheet := null;
       g_doc_props_rec := null;
    end;
    
@@ -218,7 +218,6 @@ package body spreadeasy as
             l_worksheet_rec.refcur := dbms_sql.to_cursor_number(sqlCursor_io);
             g_worksheets_nt.EXTEND;
             g_worksheets_nt(g_worksheets_nt.LAST) := l_worksheet_rec;
-            g_active_worksheet := g_worksheets_nt.LAST;
       end;      
    end;
    
@@ -260,29 +259,48 @@ package body spreadeasy as
       l_dummy_xml          XMLType;
       l_dummy_blob         BLOB;
       l_dummy_cur          SYS_REFCURSOR;
-      l_dummy_col_oradt    column_datatypes_aat ; -- Oracle data types
-      l_dummy_col_ssdt     column_datatypes_aat ; -- Spreadsheet data types
---      l_dummy_col_fmval    column_datatypes_aat ; -- Formatted values
-      
+      l_col_oratypes       column_datatypes_aat ;  -- Oracle data types
+      l_col_sstypes        column_datatypes_aat ;  -- Spreadsheet data types
+      l_col_precisions     column_precisions_aat ; -- Oracle column precisions
+      l_col_scales         column_scales_aat ;     -- Oracle column scales
+       
       PRAGMA AUTONOMOUS_TRANSACTION;
       
       function fields_info_injection(
-        worksheet_rec_in       in worksheet_rec_t
+        worksheet_rec_in           in worksheet_rec_t
       , column_ora_datatypes_aa_in in column_datatypes_aat
       , column_ss_datatypes_aa_in  in column_datatypes_aat
+      , column_precisions_aa_in    in column_precisions_aat
+      , column_scales_aa_in        in column_scales_aat
       ) return XMLType 
       is
          l_ret   XMLType;
          l_buf   CLOB;
          
-         function xslt_template(column_name_in in varchar2, oratype_in in varchar2, sstype_in varchar2) return CLOB
+         function xslt_template(
+            column_name_in in varchar2, 
+            oratype_in     in varchar2, 
+            sstype_in      in varchar2,
+            precision_in   in PLS_INTEGER,
+            scale_in       in PLS_INTEGER
+         ) return CLOB
          is
             l_buf   CLOB;
+            l_attrs  varchar2(32767);
+            
+            function xsl_attr(aname in varchar2, avalue in varchar2) return varchar2 is
+            begin
+              return '<xsl:attribute name="'||aname||'">'||avalue||'</xsl:attribute>';
+            end;
+            
          begin
             l_buf := to_clob('<xsl:template match="'||xml_safe_tag_name(column_name_in)||'">');
-            dbms_lob.append(l_buf, to_clob('<xsl:copy><xsl:attribute name="oratype">'||oratype_in||'</xsl:attribute><xsl:attribute name="sstype">'||sstype_in||'</xsl:attribute>'));
-            dbms_lob.append(l_buf, to_clob('<xsl:attribute name="column_heading">'||htf.escape_sc(column_name_in)||'</xsl:attribute>'));
-            dbms_lob.append(l_buf, to_clob('<xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
+            l_attrs := xsl_attr('oratype',oratype_in)||
+                       xsl_attr('sstype',sstype_in)||
+                       xsl_attr('precision',to_char(precision_in))||
+                       xsl_attr('scale',to_char(scale_in))||
+                       xsl_attr('column_heading',htf.escape_sc(column_name_in));
+            dbms_lob.append(l_buf, to_clob('<xsl:copy>'||l_attrs||'<xsl:apply-templates select="node()"/></xsl:copy></xsl:template>'));
             return l_buf;
          end xslt_template;
         
@@ -295,7 +313,12 @@ package body spreadeasy as
          l_colname := column_ora_datatypes_aa_in.FIRST;
          loop 
             exit when l_colname is null;
-            dbms_lob.append(l_buf, xslt_template(l_colname, column_ora_datatypes_aa_in(l_colname), column_ss_datatypes_aa_in(l_colname) )); 
+            dbms_lob.append(l_buf, xslt_template(l_colname, 
+                                                 column_ora_datatypes_aa_in(l_colname), 
+                                                 column_ss_datatypes_aa_in(l_colname),
+                                                 column_precisions_aa_in(l_colname),
+                                                 column_scales_aa_in(l_colname)
+                                                 )); 
             l_colname := column_ora_datatypes_aa_in.NEXT(l_colname);
          end loop;
          dbms_lob.append(l_buf, to_clob('</xsl:stylesheet>'));
@@ -387,7 +410,7 @@ package body spreadeasy as
          the_blob         BLOB;
          l_dest_offset    INTEGER := 1;
          l_src_offset     INTEGER := 1;
-         l_lang_ctxt      INTEGER := 0;
+         l_lang_ctxt      INTEGER := DBMS_LOB.DEFAULT_LANG_CTX;
          l_warn           INTEGER ;
       begin
          DBMS_LOB.CREATETEMPORARY(the_blob, TRUE);
@@ -398,7 +421,8 @@ package body spreadeasy as
               DBMS_LOB.getLength(clob_in),
               l_dest_offset,
               l_src_offset, 
-              NLS_CHARSET_ID(C_BUILDERS_CHARSET),
+           --   NLS_CHARSET_ID(C_BUILDERS_CHARSET),
+              DBMS_LOB.DEFAULT_CSID,
               l_lang_ctxt,
               l_warn
            );
@@ -441,11 +465,12 @@ package body spreadeasy as
          
          dbms_sql.describe_columns2(c => l_ws_rec.refcur, col_cnt => l_col_cnt, desc_t => l_desc_tab);   
          for i in 1 .. l_col_cnt loop
-            l_dummy_col_oradt(l_desc_tab(i).col_name) := dbms_sql2ora_type(l_desc_tab(i).col_type);
-            l_dummy_col_ssdt (l_desc_tab(i).col_name) := dbms_sql2spreadsheet_type(l_desc_tab(i).col_type);
---            l_dummy_col_fmval(l_desc_tab(i).col_name) := dbms_sql2formatted_values(l_desc_tab(i).col_type);
+            l_col_oratypes(l_desc_tab(i).col_name) := dbms_sql2ora_type(l_desc_tab(i).col_type);
+            l_col_sstypes (l_desc_tab(i).col_name) := dbms_sql2spreadsheet_type(l_desc_tab(i).col_type);
+            l_col_precisions(l_desc_tab(i).col_name) := l_desc_tab(i).col_precision;
+            l_col_scales(l_desc_tab(i).col_name) := l_desc_tab(i).col_scale;
          end loop;
-         l_dummy_xml := fields_info_injection(l_ws_rec, l_dummy_col_oradt, l_dummy_col_ssdt);
+         l_dummy_xml := fields_info_injection(l_ws_rec, l_col_oratypes, l_col_sstypes, l_col_precisions, l_col_scales);
                
          l_dummy_cur := dbms_sql.to_refcursor(l_ws_rec.refcur);
          l_xmlctx := DBMS_XMLGEN.newContext(l_dummy_cur);
