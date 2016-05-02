@@ -32,6 +32,7 @@ package body spreadeasy as
    g_ss_style             style_t NOT NULL := ODS;
 
    g_worksheets_nt        worksheets_nt_t not null := worksheets_nt_t();
+--   g_locale_rec           doc_locale_rt;
    g_doc_props_rec        doc_props_rt;
    
    type session_vars_aat  is table of varchar2(512) index by varchar2(30);
@@ -40,6 +41,11 @@ package body spreadeasy as
    
    g_start_time               timestamp;
    g_execution_time           execution_time_t;
+   
+   C_LANGUAGE_DFLT   CONSTANT  SPREADEASY_LOCALES.LANGUAGE%TYPE := 'en';
+   C_TERRITORY_DFLT  CONSTANT  SPREADEASY_LOCALES.TERRITORY%TYPE := 'US';
+   g_language                  SPREADEASY_LOCALES.LANGUAGE%TYPE;
+   g_territory                 SPREADEASY_LOCALES.TERRITORY%TYPE;
    
    procedure inspect_session is
       l_idx  varchar2(30);
@@ -50,6 +56,7 @@ package body spreadeasy as
       end loop;   
    end;
    
+
    procedure save_session_vars is
       type name_value_ntt  is table of v$nls_parameters%rowtype;
       l_parameters         name_value_ntt;  
@@ -65,6 +72,7 @@ package body spreadeasy as
          l_idx := l_parameters.NEXT(l_idx);
       end loop;
    end;
+
    
    procedure alter_session(param_in varchar2, value_in varchar2) is
       l_sql_stmt   varchar2(512);
@@ -143,6 +151,8 @@ package body spreadeasy as
    begin
       g_worksheets_nt := worksheets_nt_t();
       g_doc_props_rec := null;
+      g_language      := C_LANGUAGE_DFLT;
+      g_territory     := C_TERRITORY_DFLT;
    end;
    
    
@@ -178,6 +188,16 @@ package body spreadeasy as
    ) is  
    begin
       newWorkbook(ODS, author_in, company_in);
+   end;
+
+
+   procedure setLocale(
+      language_in  in SPREADEASY_LOCALES.LANGUAGE%TYPE,
+      territory_in in SPREADEASY_LOCALES.TERRITORY%TYPE
+   ) is
+   begin
+      g_language := language_in;
+      g_territory := territory_in;
    end;
 
 
@@ -328,6 +348,18 @@ package body spreadeasy as
       end fields_info_injection;
 
 
+      procedure save_xml_fragment(
+         spreadsheet_id_in  in spreadeasy_wrk.spreadsheet_id%type, 
+         fragment_id_in     in spreadeasy_wrk.worksheet_id%type, 
+         xml_fragment_in    in XMLType
+      ) is 
+      begin
+         INSERT INTO spreadeasy_wrk 
+            (spreadsheet_id   , worksheet_id  , document) 
+         values 
+            (spreadsheet_id_in, fragment_id_in, xml_fragment_in);
+      end;
+
       procedure gen_xml_fragment(
          spreadsheet_id  in spreadeasy_wrk.spreadsheet_id%type, 
          fragment_id     in spreadeasy_wrk.worksheet_id%type, 
@@ -336,13 +368,11 @@ package body spreadeasy as
       ) is 
       begin
          if ( xslt_in is null ) then
-            INSERT INTO spreadeasy_wrk
-            SELECT spreadsheet_id, fragment_id, dbms_xmlgen.getxmltype(context_in)
-              FROM dual;
+            save_xml_fragment(spreadsheet_id, fragment_id, dbms_xmlgen.getxmltype(context_in));
          else
-            INSERT INTO spreadeasy_wrk
-            SELECT spreadsheet_id, fragment_id, XMLtransform(dbms_xmlgen.getxmltype(context_in), xslt_in)
-              FROM dual;
+            INSERT INTO spreadeasy_wrk 
+            select spreadsheet_id, fragment_id, XMLtransform(dbms_xmlgen.getxmltype(context_in), xslt_in)
+              from dual;
          end if;  
       end;
       
@@ -400,6 +430,7 @@ package body spreadeasy as
       
       procedure cleanup_this_routine is
       begin
+         commit;
          rollback; -- Notice this routine starts an AUTONOMOUS TRANSACTION !
          dbms_lob.freetemporary( l_zip_content );        
          restore_session_params;
@@ -441,8 +472,47 @@ package body spreadeasy as
          return;
       end if;
       
-      SELECT spreadeasy_spreadsheet_wrk_seq.NEXTVAL INTO l_ss_id FROM dual;
+      SELECT spreadeasy_spreadsheet_wrk_seq.NEXTVAL 
+       INTO l_ss_id FROM dual;
       
+
+      select XMLElement("LOCALE", 
+             XMLForest( r.language, r.territory, r.currency_symbol, 
+                        r.writing_mode, r.date_format, r.time_format, 
+                        r.date_int_value,
+                        r.page   )
+             ) as xml
+        into l_dummy_xml     
+        FROM (     
+      select rank() over (partition by prio.DUMMY order by prio.priority) as RANKING,
+             prio.*
+        from(     
+      select 'X' AS DUMMY, 1 as PRIORITY, loc.language, loc.territory, 
+             loc.currency_symbol, loc.writing_mode, 
+             to_char(sysdate, loc.date_format) date_format, 
+             to_char(sysdate, loc.time_format) time_format, 
+             to_char(sysdate, 'YYYY-MM-DD') as date_int_value,
+             loc.page      
+        from SPREADEASY_LOCALES loc
+       WHERE loc.LANGUAGE  = g_language
+         AND loc.TERRITORY = g_territory
+       UNION  
+      select 'X' AS DUMMY, 2 as PRIORITY, loc.language, loc.territory, 
+             loc.currency_symbol, loc.writing_mode, 
+             to_char(sysdate, loc.date_format) date_format, 
+             to_char(sysdate, loc.time_format) time_format, 
+             to_char(sysdate, 'YYYY-MM-DD') as date_int_value,
+             loc.page      
+        from SPREADEASY_LOCALES loc
+       WHERE loc.LANGUAGE  = C_LANGUAGE_DFLT
+         AND loc.TERRITORY = C_TERRITORY_DFLT 
+      ) prio
+      ) r
+      where r.RANKING = 1;
+      
+      save_xml_fragment(l_ss_id, -1, l_dummy_xml);
+            
+        
       open l_dummy_cur for
       Select g_doc_props_rec.author as "Author",
              g_doc_props_rec.author as "LastAuthor",

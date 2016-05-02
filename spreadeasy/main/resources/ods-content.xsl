@@ -20,7 +20,9 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
           <style:table-row-properties style:row-height="0.42cm" fo:break-before="auto" style:use-optimal-row-height="true" />
         </style:style>
         <style:style style:name="ta1" style:family="table" style:master-page-name="Default">
-          <style:table-properties table:display="true" style:writing-mode="lr-tb" />
+          <style:table-properties table:display="true">
+            <xsl:attribute name="style:writing-mode"><xsl:value-of select="/SPREADSHEET/LOCALE/WRITING_MODE"/></xsl:attribute>
+          </style:table-properties>
         </style:style>
         <number:date-style style:name="N37" number:automatic-order="true">
           <number:day number:style="long" />
@@ -42,7 +44,9 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
           <number:text>.</number:text>
           <number:seconds number:style="long"/>
         </number:date-style>
-        <number:number-style style:name="N8000" number:language="it" number:country="IT">
+        <number:number-style style:name="N8000">
+          <xsl:attribute name="number:language"><xsl:value-of select="/SPREADSHEET/LOCALE/LANGUAGE"/></xsl:attribute>
+          <xsl:attribute name="number:country"><xsl:value-of select="/SPREADSHEET/LOCALE/TERRITORY"/></xsl:attribute>
           <number:number number:min-integer-digits="1" />
         </number:number-style>
         <style:style style:name="ce1" style:family="table-cell" style:parent-style-name="Default" style:data-style-name="N8000" />
@@ -58,11 +62,15 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
   </xsl:template>
 
 
-  <xsl:template match="/*/*[position() = 1]">
+  <xsl:template match="/*/LOCALE">
   </xsl:template>
 
 
-  <xsl:template match="/*/*[position() > 1]">
+  <xsl:template match="/*/*[position() = 2]">
+  </xsl:template>
+
+
+  <xsl:template match="/*/*[position() > 2]">
     <table:table table:style-name="ta1" table:print="false">
       <xsl:attribute name="table:name"><xsl:value-of select="./@worksheet_name"/></xsl:attribute>
       <table:table-column table:style-name="co1" table:default-cell-style-name="Default" />

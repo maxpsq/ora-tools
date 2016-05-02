@@ -30,6 +30,14 @@ begin
   -- Initilize your Document (document properties are optional)
   spreadeasy.newODS('Massimo Pasquini', 'ACME Industries'); 
 
+  -- Set a locale (language + territory)
+  -- The locale must match a record in SPREADEASY_LOCALES, the
+  -- default locale en_US will be set in case of mismatch.
+  -- Feel free to add any missing locale to the table
+  -- SPREADEASY_LOCALES and contribute to fill the missing 
+  -- records sending a pull request to this repository.
+  spreadeasy.setLocale('it','IT');
+
   -- Open a cursor variable... (1)
   Open l_emp_cur for 
     SELECT First_name, Last_Name, salary 

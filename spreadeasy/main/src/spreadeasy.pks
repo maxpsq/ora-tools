@@ -72,6 +72,17 @@ package spreadeasy as
    );
    
 
+   /** 
+    Set a locale (language, territory). 
+    The tuple language/territory must match a record in SPREADEASY_LOCALES. The
+    default locale `en_US` will be used in case of mismatch.
+   */
+   procedure setLocale(
+      language_in  in SPREADEASY_LOCALES.LANGUAGE%TYPE,
+      territory_in in SPREADEASY_LOCALES.TERRITORY%TYPE
+   );
+   
+
    /** Return the spreadsheet style previously set */
    function getStyle return style_t;
 

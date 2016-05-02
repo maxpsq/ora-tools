@@ -83,7 +83,6 @@ package body spreadeasy_admin is
             values (s.style_id, s.step, s.builder_type, s.out_path, s.xml_doc);
       commit; 
    end; 
-
   
   
    procedure load_txt_builder(
@@ -150,7 +149,6 @@ package body spreadeasy_admin is
    end; 
 
   
-  
    procedure load_ods_builders(charset_in  in varchar2) is
       l_style_id   spreadeasy_builders.style_id%type := spreadeasy.ODS;
    begin
@@ -165,8 +163,8 @@ package body spreadeasy_admin is
                        ORA_DIRNAME, 'ods-manifest.rdf', charset_in);
       load_xml_builder(l_style_id, 5, 'XSL', 'content.xml', 
                        ORA_DIRNAME, 'ods-content.xsl', charset_in);
-      load_xml_builder(l_style_id, 6, 'XML', 'styles.xml', 
-                       ORA_DIRNAME, 'ods-styles.xml', charset_in);
+      load_xml_builder(l_style_id, 6, 'XSL', 'styles.xml', 
+                       ORA_DIRNAME, 'ods-styles.xsl', charset_in);
       load_xml_builder(l_style_id, 7, 'XSL', 'settings.xml', 
                        ORA_DIRNAME, 'ods-settings.xsl', charset_in);
       -- Notice `current.xml` is an empty file, therefore it's been classified
