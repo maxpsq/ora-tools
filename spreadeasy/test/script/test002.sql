@@ -6,7 +6,7 @@ declare
    l_stmt2 VARCHAR2(500) := 'SELECT DEPARTMENT_NAME as "Dipartimento", MANAGER_ID as "ID>capo" FROM hr.departments WHERE rownum < 4';
 begin
    spreadeasy.newODS('Massimo Pasquini','New Company');
-   spreadeasy.setLocale('it','IT');
+   spreadeasy.setLocale('en','US');
    spreadeasy.addWorksheet(l_stmt1);
    spreadeasy.addWorksheet(l_stmt2);
    spreadeasy.build(l_ora_dir, 'hr.ods');

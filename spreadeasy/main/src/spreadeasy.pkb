@@ -11,7 +11,7 @@ package body spreadeasy as
   a software by Massimo Pasquini                                   vers. 1.0-M3
   
   License                                                    Apache version 2.0
-  Last update                                                       2016-Feb-23
+  Last update                                                       2016-May-03
   
   Project homepage                          https://github.com/maxpsq/ora-tools
 
@@ -32,7 +32,6 @@ package body spreadeasy as
    g_ss_style             style_t NOT NULL := ODS;
 
    g_worksheets_nt        worksheets_nt_t not null := worksheets_nt_t();
---   g_locale_rec           doc_locale_rt;
    g_doc_props_rec        doc_props_rt;
    
    type session_vars_aat  is table of varchar2(512) index by varchar2(30);
@@ -430,7 +429,6 @@ package body spreadeasy as
       
       procedure cleanup_this_routine is
       begin
-         commit;
          rollback; -- Notice this routine starts an AUTONOMOUS TRANSACTION !
          dbms_lob.freetemporary( l_zip_content );        
          restore_session_params;
@@ -452,8 +450,8 @@ package body spreadeasy as
               DBMS_LOB.getLength(clob_in),
               l_dest_offset,
               l_src_offset, 
-           --   NLS_CHARSET_ID(C_BUILDERS_CHARSET),
-              DBMS_LOB.DEFAULT_CSID,
+              NLS_CHARSET_ID(C_BUILDERS_CHARSET),
+           --   DBMS_LOB.DEFAULT_CSID,
               l_lang_ctxt,
               l_warn
            );
@@ -489,20 +487,24 @@ package body spreadeasy as
         from(     
       select 'X' AS DUMMY, 1 as PRIORITY, loc.language, loc.territory, 
              loc.currency_symbol, loc.writing_mode, 
-             to_char(sysdate, loc.date_format) date_format, 
-             to_char(sysdate, loc.time_format) time_format, 
-             to_char(sysdate, 'YYYY-MM-DD') as date_int_value,
-             loc.page      
+             loc.date_format                   as date_format, 
+             loc.time_format                   as time_format, 
+             to_char(sysdate, loc.date_format) as date_value, 
+             to_char(sysdate, loc.time_format) as time_value, 
+             to_char(sysdate, 'YYYY-MM-DD')    as date_int_value,
+             loc.page
         from SPREADEASY_LOCALES loc
        WHERE loc.LANGUAGE  = g_language
          AND loc.TERRITORY = g_territory
        UNION  
       select 'X' AS DUMMY, 2 as PRIORITY, loc.language, loc.territory, 
              loc.currency_symbol, loc.writing_mode, 
-             to_char(sysdate, loc.date_format) date_format, 
-             to_char(sysdate, loc.time_format) time_format, 
-             to_char(sysdate, 'YYYY-MM-DD') as date_int_value,
-             loc.page      
+             loc.date_format                   as date_format, 
+             loc.time_format                   as time_format, 
+             to_char(sysdate, loc.date_format) as date_value, 
+             to_char(sysdate, loc.time_format) as time_value, 
+             to_char(sysdate, 'YYYY-MM-DD')    as date_int_value,
+             loc.page
         from SPREADEASY_LOCALES loc
        WHERE loc.LANGUAGE  = C_LANGUAGE_DFLT
          AND loc.TERRITORY = C_TERRITORY_DFLT 

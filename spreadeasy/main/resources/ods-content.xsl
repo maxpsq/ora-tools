@@ -25,24 +25,18 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
           </style:table-properties>
         </style:style>
         <number:date-style style:name="N37" number:automatic-order="true">
-          <number:day number:style="long" />
-          <number:text>/</number:text>
-          <number:month number:style="long" />
-          <number:text>/</number:text>
-          <number:year number:style="long" />
+          <xsl:call-template name="analyze-date-format">
+            <xsl:with-param name="p-date-format" select="/SPREADSHEET/LOCALE/DATE_FORMAT" />
+          </xsl:call-template>
         </number:date-style>
         <number:date-style style:name="N38" number:automatic-order="true">
-          <number:day number:style="long" />
-          <number:text>/</number:text>
-          <number:month number:style="long" />
-          <number:text>/</number:text>
-          <number:year number:style="long"/>
-          <number:text> </number:text>
-          <number:hours number:style="long"/>
-          <number:text>.</number:text>
-          <number:minutes number:style="long"/>
-          <number:text>.</number:text>
-          <number:seconds number:style="long"/>
+          <xsl:call-template name="analyze-date-format">
+            <xsl:with-param name="p-date-format" select="/SPREADSHEET/LOCALE/DATE_FORMAT" />
+          </xsl:call-template>
+          <number:text xml:space="preserve"> </number:text>
+          <xsl:call-template name="analyze-time-format">
+            <xsl:with-param name="p-time-format" select="/SPREADSHEET/LOCALE/TIME_FORMAT" />
+          </xsl:call-template>
         </number:date-style>
         <number:number-style style:name="N8000">
           <xsl:attribute name="number:language"><xsl:value-of select="/SPREADSHEET/LOCALE/LANGUAGE"/></xsl:attribute>
@@ -96,7 +90,7 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
   <xsl:template match="/*/*[position() > 1]/*/*[@oratype='DATE' and contains(text(),'T00:00:00.000')]">
     <table:table-cell table:style-name="ce2" office:value-type="date">
       <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(.,'T00:00:00.000')"/></xsl:attribute>
-      <text:p><xsl:value-of select="translate(substring-before(.,'T00:00:00.000'), 'T', ' ')"/></text:p>
+      <text:p><xsl:value-of select="substring-before(.,'T00:00:00.000')"/></text:p>
     </table:table-cell>
   </xsl:template>
 
@@ -139,6 +133,92 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
     <table:table-cell office:value-type="string">
       <text:p><xsl:value-of select="."/></text:p>
     </table:table-cell>
+  </xsl:template>
+
+
+  <xsl:template name="analyze-date-format">
+    <xsl:param name="p-date-format"/>
+    <xsl:variable name="date-format" select="translate($p-date-format, 'yrmd', 'YRMD')" />
+    <xsl:variable name="separators" select="translate($date-format, 'YRMD', '')" />
+    <xsl:variable name="separator" select="substring($separators, 1, 1)" />
+    <xsl:variable name="token">
+        <xsl:choose>
+            <xsl:when test="$separator">
+                <xsl:value-of select="substring-before($date-format, $separator)" />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$date-format" />
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    <xsl:choose>
+        <xsl:when test="$token = 'YYYY'">
+            <number:year number:style="long" />
+        </xsl:when>
+        <xsl:when test="$token = 'RRRR'">
+            <number:year number:style="long" />
+        </xsl:when>
+        <xsl:when test="$token = 'YY'">
+            <number:year number:style="short" />
+        </xsl:when>
+        <xsl:when test="$token = 'RR'">
+            <number:year number:style="short" />
+        </xsl:when>
+        <xsl:when test="$token = 'MM'">
+            <number:month number:style="long" />
+        </xsl:when>
+        <xsl:when test="$token = 'DD'">
+            <number:day number:style="long" />
+        </xsl:when>
+    </xsl:choose> 
+    <xsl:if test="$separators">
+      <!-- DO NOT BREAKE THIS LINE!! Notice xml:space="preserve" -->
+        <number:text xml:space="preserve"><xsl:value-of select="$separator" /></number:text>
+         <!-- recursive call -->
+        <xsl:call-template name="analyze-date-format">
+            <xsl:with-param name="p-date-format" select="substring-after($date-format, $separator)" />
+        </xsl:call-template>
+    </xsl:if>
+  </xsl:template>
+
+  
+  <xsl:template name="analyze-time-format">
+    <xsl:param name="p-time-format"/>
+    <xsl:variable name="time-format" select="translate($p-time-format, 'hmis', 'HMIS')" />
+    <xsl:variable name="separators" select="translate($time-format, 'H24MIS', '')" />
+    <xsl:variable name="separator" select="substring($separators, 1, 1)" />
+    <xsl:variable name="token">
+        <xsl:choose>
+            <xsl:when test="$separator">
+                <xsl:value-of select="substring-before($time-format, $separator)" />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$time-format" />
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    <xsl:choose>
+        <xsl:when test="$token = 'HH24'">
+            <number:hours number:style="long" />
+        </xsl:when>
+        <xsl:when test="$token = 'HH'">
+            <number:hours number:style="long" />
+        </xsl:when>
+        <xsl:when test="$token = 'MI'">
+            <number:minutes number:style="long" />
+        </xsl:when>
+        <xsl:when test="$token = 'SS'">
+            <number:seconds number:style="long" />
+        </xsl:when>
+    </xsl:choose> 
+    <xsl:if test="$separators">
+      <!-- DO NOT BREAKE THIS LINE!! Notice xml:space="preserve" -->
+        <number:text xml:space="preserve"><xsl:value-of select="$separator" /></number:text>
+         <!-- recursive call -->
+        <xsl:call-template name="analyze-time-format">
+            <xsl:with-param name="p-time-format" select="substring-after($time-format, $separator)" />
+        </xsl:call-template>
+    </xsl:if>
   </xsl:template>
 
 

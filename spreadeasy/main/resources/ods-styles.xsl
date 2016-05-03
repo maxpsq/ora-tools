@@ -117,10 +117,10 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:chart="urn
               <text:p>
                 <text:date style:data-style-name="N2">
                   <xsl:attribute name="text:date-value"><xsl:value-of select="SPREADSHEET/LOCALE/DATE_INT_VALUE"/></xsl:attribute>
-                  <xsl:value-of select="SPREADSHEET/LOCALE/DATE_FORMAT"/>
+                  <xsl:value-of select="SPREADSHEET/LOCALE/DATE_VALUE"/>
                 </text:date>
                 ,
-                <text:time><xsl:value-of select="SPREADSHEET/LOCALE/TIME_FORMAT"/></text:time>
+                <text:time><xsl:value-of select="SPREADSHEET/LOCALE/TIME_VALUE"/></text:time>
               </text:p>
             </style:region-right>
           </style:header>
