@@ -90,7 +90,12 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
   <xsl:template match="/*/*[position() > 1]/*/*[@oratype='DATE' and contains(text(),'T00:00:00.000')]">
     <table:table-cell table:style-name="ce2" office:value-type="date">
       <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(.,'T00:00:00.000')"/></xsl:attribute>
-      <text:p><xsl:value-of select="substring-before(.,'T00:00:00.000')"/></text:p>
+      <text:p>
+          <xsl:call-template name="format-datetime">
+            <xsl:with-param name="p-datetime-value" select="substring-before(.,'T00:00:00.000')" /> 
+            <xsl:with-param name="p-datetime-format" select="/SPREADSHEET/LOCALE/DATE_FORMAT" />
+          </xsl:call-template>
+      </text:p>
     </table:table-cell>
   </xsl:template>
 
@@ -98,15 +103,26 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
   <xsl:template match="/*/*[position() > 1]/*/*[@oratype='DATE' and not(contains(text(),'T00:00:00.000'))]">
     <table:table-cell table:style-name="ce3" office:value-type="date">
       <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(.,'.000')"/></xsl:attribute>
-      <text:p><xsl:value-of select="translate(substring-before(.,'.000'), 'T', ' ')"/></text:p>
+      <text:p>
+          <xsl:call-template name="format-datetime">
+            <xsl:with-param name="p-datetime-value" select="substring-before(.,'.000')" /> 
+            <xsl:with-param name="p-datetime-format" select="/SPREADSHEET/LOCALE/DATETIME_FORMAT" />
+          </xsl:call-template>
+      </text:p>
     </table:table-cell>
   </xsl:template>
 
 
+  
   <xsl:template match="/*/*[position() > 1]/*/*[@oratype='TIMESTAMP' or @oratype='TIMESTAMP WITH TIME ZONE' or @oratype='TIMESTAMP WITH LOCAL TIMEZONE']">
     <table:table-cell table:style-name="ce3" office:value-type="date">
       <xsl:attribute name="office:date-value"><xsl:value-of select="substring-before(.,'.000')"/></xsl:attribute>  
-      <text:p><xsl:value-of select="translate(substring-before(.,'.000'), 'T', ' ')"/></text:p>
+      <text:p>
+          <xsl:call-template name="format-datetime">
+            <xsl:with-param name="p-datetime-value" select="substring-before(.,'.000')" /> 
+            <xsl:with-param name="p-datetime-format" select="/SPREADSHEET/LOCALE/DATETIME_FORMAT" />
+          </xsl:call-template>
+      </text:p>
     </table:table-cell>
   </xsl:template>
 
@@ -221,5 +237,71 @@ xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn
     </xsl:if>
   </xsl:template>
 
+
+
+  <xsl:template name="format-datetime">
+    <xsl:param name="p-datetime-value"/>
+    <xsl:param name="p-datetime-format"/>
+    <xsl:variable name="datetime-format" select="translate($p-datetime-format, 'yrmdhis', 'YRMDHIS')" /> 
+    <xsl:variable name="separators" select="translate($datetime-format, 'YRMDH24IS', '')" />
+    <xsl:variable name="separator" select="substring($separators, 1, 1)" />
+    <xsl:variable name="year" select="substring($p-datetime-value,  1, 4)" />
+    <xsl:variable name="month" select="substring($p-datetime-value,  6, 2)" />
+    <xsl:variable name="day" select="substring($p-datetime-value,  9, 2)" />
+    <xsl:variable name="hour" select="substring($p-datetime-value,  12, 2)" />
+    <xsl:variable name="min" select="substring($p-datetime-value,  15, 2)" />
+    <xsl:variable name="sec" select="substring($p-datetime-value,  18, 2)" />
+  
+    <xsl:variable name="token">
+        <xsl:choose>
+            <xsl:when test="$separator">
+                <xsl:value-of select="substring-before($datetime-format, $separator)" />
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="$datetime-format" />
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+    <xsl:choose>
+        <xsl:when test="$token = 'YYYY'">
+            <xsl:value-of select="$year" />
+        </xsl:when>
+        <xsl:when test="$token = 'RRRR'">
+            <xsl:value-of select="$year" />
+        </xsl:when>
+        <xsl:when test="$token = 'YY'">
+            <xsl:value-of select="substring($year,3,2)" />
+        </xsl:when>
+        <xsl:when test="$token = 'RR'">
+            <xsl:value-of select="substring($year,3,2)" />
+        </xsl:when>
+        <xsl:when test="$token = 'MM'">
+            <xsl:value-of select="$month" />
+        </xsl:when>
+        <xsl:when test="$token = 'DD'">
+            <xsl:value-of select="$day" />
+        </xsl:when>
+        <xsl:when test="$token = 'HH'">
+            <xsl:value-of select="$hour" />
+        </xsl:when>
+        <xsl:when test="$token = 'HH24'">
+            <xsl:value-of select="$hour" />
+        </xsl:when>
+        <xsl:when test="$token = 'MI'">
+            <xsl:value-of select="$min" />
+        </xsl:when>
+        <xsl:when test="$token = 'SS'">
+            <xsl:value-of select="$sec" />
+        </xsl:when>
+    </xsl:choose> 
+    <xsl:if test="$separators">
+        <xsl:value-of select="$separator" />
+         <!-- recursive call -->
+        <xsl:call-template name="format-datetime">
+            <xsl:with-param name="p-datetime-value"  select="$p-datetime-value" />
+            <xsl:with-param name="p-datetime-format" select="substring-after($datetime-format, $separator)" />
+        </xsl:call-template>
+    </xsl:if>
+  </xsl:template>
 
 </xsl:stylesheet>

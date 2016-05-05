@@ -476,7 +476,7 @@ package body spreadeasy as
 
       select XMLElement("LOCALE", 
              XMLForest( r.language, r.territory, r.currency_symbol, 
-                        r.writing_mode, r.date_format, r.time_format, 
+                        r.writing_mode, r.date_format, r.time_format, datetime_format,
                         r.date_int_value,
                         r.page   )
              ) as xml
@@ -489,6 +489,7 @@ package body spreadeasy as
              loc.currency_symbol, loc.writing_mode, 
              loc.date_format                   as date_format, 
              loc.time_format                   as time_format, 
+             loc.date_format||' '||loc.time_format  as datetime_format, 
              to_char(sysdate, loc.date_format) as date_value, 
              to_char(sysdate, loc.time_format) as time_value, 
              to_char(sysdate, 'YYYY-MM-DD')    as date_int_value,
@@ -501,6 +502,7 @@ package body spreadeasy as
              loc.currency_symbol, loc.writing_mode, 
              loc.date_format                   as date_format, 
              loc.time_format                   as time_format, 
+             loc.date_format||' '||loc.time_format  as datetime_format, 
              to_char(sysdate, loc.date_format) as date_value, 
              to_char(sysdate, loc.time_format) as time_value, 
              to_char(sysdate, 'YYYY-MM-DD')    as date_int_value,
