@@ -1,8 +1,8 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <oracle.dbtools.crest.model.design.relational.RelationalDesign>
-   <object objectType="Table" objectID="52598793-1DCD-09C9-9AF8-2D789283283B" name="SPREADEASY_BUILDERS" seqName="seg_0"/>
-   <object objectType="Table" objectID="46700B16-FC2E-4F85-8B46-765FD07AB73B" name="SPREADEASY_LOCALES" seqName="seg_0"/>
-   <object objectType="Table" objectID="57BD19D4-9A84-79D6-2948-CF081C89FEFC" name="SPREADEASY_STYLES" seqName="seg_0"/>
-   <object objectType="Table" objectID="5D4CE4D2-6B4A-6917-6492-B7DF5BDD39B7" name="SPREADEASY_WRK" seqName="seg_0"/>
-   <object objectType="FKIndexAssociation" objectID="19A14ED1-12A8-D24C-0B51-1C4BE1FFC08E" name="SPREADEASY$BUILDERS_STYLES_FK" seqName="seg_0" containerID="52598793-1DCD-09C9-9AF8-2D789283283B" refContainerID="57BD19D4-9A84-79D6-2948-CF081C89FEFC"/>
+   <object objectType="Table" objectID="46700B16-FC2E-4F85-8B46-765FD07AB73B" name="SPREADEASY_LOCALES" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
+   <object objectType="Table" objectID="52598793-1DCD-09C9-9AF8-2D789283283B" name="SPREADEASY_BUILDERS" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
+   <object objectType="Table" objectID="57BD19D4-9A84-79D6-2948-CF081C89FEFC" name="SPREADEASY_STYLES" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
+   <object objectType="Table" objectID="5D4CE4D2-6B4A-6917-6492-B7DF5BDD39B7" name="SPREADEASY_WRK" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
+   <object objectType="FKIndexAssociation" objectID="19A14ED1-12A8-D24C-0B51-1C4BE1FFC08E" name="SPREADEASY$BUILDERS_STYLES_FK" containerID="52598793-1DCD-09C9-9AF8-2D789283283B" refContainerID="57BD19D4-9A84-79D6-2948-CF081C89FEFC" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
 </oracle.dbtools.crest.model.design.relational.RelationalDesign>

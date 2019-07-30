@@ -23,7 +23,7 @@ declare
   -- This is a ORACLE DIRECTORY you've been granted write permissions
   l_ora_dir  varchar2(30) := 'SPREADEASY_RESOURCES';
   l_emp_cur         SYS_REFCURSOR;
-  l_dpt_stmt        VARCHAR2(400);
+  l_dpt_cur         SYS_REFCURSOR;
   spreadsheet_xml   XMLtype;
   spreadsheet_clob  CLOB;
 begin
@@ -38,17 +38,19 @@ begin
   -- records sending a pull request to this repository.
   spreadeasy.setLocale('it','IT');
 
-  -- Open a cursor variable... (1)
+  -- Open some cursor variables... (1)
   Open l_emp_cur for 
     SELECT First_name, Last_Name, salary 
       from hr.employees ;
 
-  -- ...or just fill a string with a SQL statement
-  l_dpt_stmt := 'SELECT department_id, department_name FROM hr.departments' ;
+  Open l_dpt_cur for 
+    SELECT department_id, department_name 
+      FROM hr.departments ;
+
 
   -- Wrap the results of each cursor in a new named worksheet
   spreadeasy.addWorkSheet(l_emp_cur, 'Employees'); 
-  spreadeasy.addWorkSheet(l_dpt_stmt, 'Departments');
+  spreadeasy.addWorkSheet(l_dpt_cur, 'Departments');
 
   -- build the XML documents and save them as a ODS zipped archive.
   spreadeasy.build(l_ora_dir, 'hr.ods'); 
@@ -109,7 +111,7 @@ finally, run this script
 begin
   spreadeasy_admin.set_resource_dir('/your/absolute/path/to/ora-tools/spreadeasy/main/resources');
   -- automatically issues a commit in an autonomous transaction
-  spreadeasy_admin.load_all_builders; 
+  spreadeasy_admin.load_all_builders;
 end;
 /
 ```

@@ -94,12 +94,14 @@ package spreadeasy as
    );
    
    
-   /** Add a new worksheet and on which the select statement data will be shown */
+   /** Add a new worksheet and on which the select statement data will be shown 
+   !! PARSING THE SQL INSIDE THIS PACKAGE RAISE PROBLEMS RELATED TO GRANTS TO
+   OTHER SCHEMAS. THIS PACKAGE MUST USE THE DEFAULT AUTHID DEFINER.
    procedure addWorksheet(
       sqlSelect_in in     varchar2,
       name_in      in     worksheet_name_t DEFAULT null
    );
-   
+   */
    
    /** Build the spreadsheet using the cursors passed to each worksheet
        and save it to disk at the given location */

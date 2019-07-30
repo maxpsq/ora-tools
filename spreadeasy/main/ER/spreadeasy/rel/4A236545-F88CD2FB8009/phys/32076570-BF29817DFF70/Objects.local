@@ -1,10 +1,9 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <oracle.dbtools.crest.model.design.storage.oracle.v11g.StorageDesignOraclev11g>
-   <object objectType="User" objectID="MDSYS" name="MDSYS" seqName="seg_0"/>
-   <object objectType="User" objectID="PUBLIC" name="PUBLIC" seqName="seg_0"/>
-   <object objectType="SType" objectID="47E390DE-0671-C4B1-8428-0F45CBEE18F8" name="SDO_GEOMETRY" seqName="seg_0"/>
-   <object objectType="SType" objectID="F72C39E0-D1CA-8821-2AD7-A1E95A37D3D1" name="XMLTYPE" seqName="seg_0"/>
-   <object objectType="Table" objectID="57BD19D4-9A84-79D6-2948-CF081C89FEFC" name="SPREADEASY_STYLES" seqName="seg_0"/>
-   <object objectType="Table" objectID="5D4CE4D2-6B4A-6917-6492-B7DF5BDD39B7" name="SPREADEASY_WRK" seqName="seg_0"/>
-   <object objectType="Sequence" objectID="67B94864-F80C-6ACB-4350-8176AD80AA09" name="SPREADEASY_WRK_SEQ" seqName="seg_0"/>
+   <object objectType="User" objectID="MDSYS" name="MDSYS" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
+   <object objectType="User" objectID="PUBLIC" name="PUBLIC" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
+   <object objectType="SType" objectID="47E390DE-0671-C4B1-8428-0F45CBEE18F8" name="SDO_GEOMETRY" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
+   <object objectType="Table" objectID="57BD19D4-9A84-79D6-2948-CF081C89FEFC" name="SPREADEASY_STYLES" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
+   <object objectType="Table" objectID="5D4CE4D2-6B4A-6917-6492-B7DF5BDD39B7" name="SPREADEASY_WRK" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
+   <object objectType="Sequence" objectID="67B94864-F80C-6ACB-4350-8176AD80AA09" name="SPREADEASY_WRK_SEQ" seqName="seg_0" propertyClassName="" propertyParentId="" propertySourceId="" propertyTargetId=""/>
 </oracle.dbtools.crest.model.design.storage.oracle.v11g.StorageDesignOraclev11g>

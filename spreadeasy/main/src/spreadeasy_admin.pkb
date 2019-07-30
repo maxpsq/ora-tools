@@ -32,6 +32,14 @@ package body spreadeasy_admin is
    end;
 
 
+   procedure unset_resource_dir is
+      l_stmt  varchar2(32767);
+   begin
+      l_stmt := 'drop directory '||ORA_DIRNAME;
+      execute immediate l_stmt;
+   end;
+
+
    procedure set_style(
       style_id_in    in spreadeasy_styles.style_id%type, 
       description_in in spreadeasy_styles.description%type

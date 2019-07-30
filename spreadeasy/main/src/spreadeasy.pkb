@@ -240,7 +240,7 @@ package body spreadeasy as
       end;      
    end;
    
-
+/*
    procedure addWorksheet(
       sqlSelect_in in     varchar2,
       name_in      in     worksheet_name_t DEFAULT null
@@ -250,7 +250,7 @@ package body spreadeasy as
       open l_cur for sqlSelect_in;
       addWorksheet(l_cur, name_in);
    end;
-   
+*/   
    
    function getStyle return style_t is
    begin
@@ -470,7 +470,7 @@ package body spreadeasy as
          return;
       end if;
       
-      SELECT spreadeasy_spreadsheet_wrk_seq.NEXTVAL 
+      SELECT spreadeasy_wrk_seq.NEXTVAL 
        INTO l_ss_id FROM dual;
       
 

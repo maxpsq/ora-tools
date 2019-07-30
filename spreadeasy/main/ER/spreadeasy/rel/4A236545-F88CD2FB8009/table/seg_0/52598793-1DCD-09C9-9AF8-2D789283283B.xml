@@ -18,7 +18,7 @@
 <use>1</use>
 <logicalDatatype>LOGDT019</logicalDatatype>
 <dataTypePrecision>3</dataTypePrecision>
-<ownDataTypeParameters>,3,</ownDataTypeParameters>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
 <previousColumn>false</previousColumn>
 <autoIncrementCycle>false</autoIncrementCycle>
 <associations>
@@ -39,7 +39,7 @@
 <ownDataTypeParameters>,3,</ownDataTypeParameters>
 <autoIncrementCycle>false</autoIncrementCycle>
 </Column>
-<Column name="BILDER_TYPE" id="55D7DA47-4046-F200-1530-59975C2D755C">
+<Column name="BUILDER_TYPE" id="55D7DA47-4046-F200-1530-59975C2D755C">
 <createdBy>max</createdBy>
 <createdTime>2016-04-16 16:40:36 UTC</createdTime>
 <comment>Builder type</comment>
