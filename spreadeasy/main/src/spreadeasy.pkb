@@ -548,6 +548,7 @@ package body spreadeasy as
                
          l_dummy_cur := dbms_sql.to_refcursor(l_ws_rec.refcur);
          l_xmlctx := DBMS_XMLGEN.newContext(l_dummy_cur);
+         DBMS_XMLGEN.SETNULLHANDLING(l_xmlctx, DBMS_XMLGEN.EMPTY_TAG);
          gen_xml_fragment(l_ss_id, l_ws_idx, l_xmlctx, l_dummy_xml);
          DBMS_XMLGEN.CLOSECONTEXT(l_xmlctx);
          close l_dummy_cur;  
